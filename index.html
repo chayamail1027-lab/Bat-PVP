@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hex-Smash: Arena Online</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #a29bfe; font-family: 'Segoe UI', sans-serif; touch-action: none; color: white; }
+        canvas { display: block; }
+        
+        /* UI Layers */
+        #overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(108, 92, 231, 0.9), rgba(162, 155, 254, 0.8)); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(15px); transition: 0.5s; }
+        .menu-card { background: rgba(255, 255, 255, 0.15); padding: 40px; border-radius: 40px; display: flex; flex-direction: column; gap: 20px; min-width: 320px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        
+        h1 { font-size: 70px; margin: 0; text-shadow: 0 10px 20px rgba(0,0,0,0.2); letter-spacing: -2px; text-align: center; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        .btn { padding: 18px 35px; font-size: 20px; background: #55efc4; color: #2d3436; border: none; cursor: pointer; border-radius: 20px; font-weight: 900; transition: 0.3s; box-shadow: 0 5px 0 #00b894; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #00b894; filter: brightness(1.1); }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #00b894; }
+        .btn.secondary { background: #81ecec; box-shadow: 0 5px 0 #00cec9; }
+        .btn-back { background: #fab1a0; box-shadow: 0 5px 0 #e17055; margin-top: 10px; }
+        
+        input, select { padding: 15px; border-radius: 15px; border: none; font-size: 18px; background: rgba(255,255,255,0.9); color: #2d3436; width: 100%; box-sizing: border-box; }
+        
+        /* Mobile Controls (Automatically Shown on Mobile) */
+        #mobile-controls { position: absolute; inset: 0; pointer-events: none; display: none; }
+        #joystick-base { position: absolute; bottom: 60px; left: 60px; width: 140px; height: 140px; background: rgba(255,255,255,0.2); border-radius: 50%; pointer-events: auto; border: 2px solid rgba(255,255,255,0.4); }
+        #joystick-knob { position: absolute; top: 40px; left: 40px; width: 60px; height: 60px; background: #fff; border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        #action-btn { position: absolute; bottom: 80px; right: 60px; width: 100px; height: 100px; background: #ff7675; border-radius: 50%; border: 6px solid #fff; pointer-events: auto; display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+
+        .hidden { opacity: 0; pointer-events: none; display: none; }
+        #room-id-display { font-size: 28px; color: #ffeaa7; font-weight: 900; text-align: center; }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <h1 id="txt-title">HEX-SMASH</h1>
+        
+        <div id="menu-main" class="menu-card">
+            <button id="nav-play" class="btn">PLAY</button>
+            <button id="nav-settings" class="btn secondary">SETTINGS</button>
+        </div>
+
+        <div id="menu-play" class="menu-card hidden">
+            <button id="btn-cpu" class="btn">1v1 (CPU)</button>
+            <button id="nav-room" class="btn secondary">ONLINE ROOM</button>
+            <button class="btn btn-back nav-to-main">BACK</button>
+        </div>
+
+        <div id="menu-room" class="menu-card hidden">
+            <button id="btn-create" class="btn">CREATE ROOM</button>
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="room-input" placeholder="Room ID">
+                <button id="btn-join" class="btn">JOIN</button>
+            </div>
+            <div id="room-id-display"></div>
+            <button class="btn btn-back nav-to-play">BACK</button>
+        </div>
+
+        <div id="menu-settings" class="menu-card hidden">
+            <label id="txt-nick">NICKNAME:</label>
+            <input type="text" id="nick-input" maxlength="10" value="Player">
+            <label id="txt-lang">LANGUAGE:</label>
+            <select id="lang-select">
+                <option value="ja">日本語</option>
+                <option value="en" selected>English</option>
+            </select>
+            <button class="btn btn-back nav-to-main">SAVE & BACK</button>
+        </div>
+    </div>
+
+    <div id="mobile-controls">
+        <div id="joystick-base"><div id="joystick-knob"></div></div>
+        <div id="action-btn">SMASH!</div>
+    </div>
+
+    <script type="importmap">
+    { "imports": { 
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+        "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
+    }}
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { initializeApp } from 'firebase/app';
+        import { getDatabase, ref, set, onValue, update, onDisconnect } from 'firebase/database';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCpKtPQrNhlmoXMnKIlu-nVDrAkTNj70Y",
+            authDomain: "hexsmashonline.firebaseapp.com",
+            projectId: "hexsmashonline",
+            storageBucket: "hexsmashonline.firebasestorage.app",
+            messagingSenderId: "636400445047",
+            appId: "1:636400445047:web:d35346840aebb9f5e70872",
+            databaseURL: "https://hexsmashonline-default-rtdb.firebaseio.com"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let gameState = 'MENU';
+        let isOnline = false, myRole = 'p1', roomId = null, lang = 'en', nickname = 'Player';
+        const agents = [];
+        const i18n = {
+            ja: { title: "ヘックス・スマッシュ", play: "プレイ", settings: "設定", cpu: "CPU対戦", room: "ルーム対戦", create: "部屋を作る", join: "参加", back: "戻る", nick: "ニックネーム:", lang: "言語:", wait: "待機中..." },
+            en: { title: "HEX-SMASH", play: "PLAY", settings: "SETTINGS", cpu: "1v1 (CPU)", room: "ONLINE ROOM", create: "CREATE ROOM", join: "JOIN", back: "BACK", nick: "NICKNAME:", lang: "LANGUAGE:", wait: "WAITING..." }
+        };
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xa29bfe);
+        scene.fog = new THREE.Fog(0xa29bfe, 20, 100);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+        scene.add(new THREE.DirectionalLight(0xffffff, 2).clone().translateY(20));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+
+        const arenaRadius = 10;
+        const arena = new THREE.Mesh(new THREE.CylinderGeometry(arenaRadius, arenaRadius+1, 2, 6), new THREE.MeshStandardMaterial({ color: 0x636e72 }));
+        arena.receiveShadow = true; arena.position.y = -1; scene.add(arena);
+
+        class Fighter {
+            constructor(color, name, isPlayer, startPos, role) {
+                this.name = name; this.isPlayer = isPlayer; this.role = role;
+                this.alive = true; this.velocity = new THREE.Vector3(); this.onGround = true;
+                this.mesh = new THREE.Group();
+                const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.5, 1, 4, 8), new THREE.MeshStandardMaterial({ color }));
+                b.castShadow = true; b.position.y = 1; this.mesh.add(b);
+                this.batPivot = new THREE.Group(); this.batPivot.position.set(0.6, 1, 0);
+                const bat = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 1.5), new THREE.MeshStandardMaterial({ color: 0xffd32a }));
+                bat.rotation.x = Math.PI/2; bat.position.z = 0.7; this.batPivot.add(bat);
+                this.mesh.add(this.batPivot); this.mesh.position.copy(startPos);
+                scene.add(this.mesh); agents.push(this);
+            }
+            swing() {
+                if (this.swingCooldown > 0) return;
+                this.swingCooldown = 30; this.isSwinging = true; this.swingTime = 0;
+                if (isOnline && this.role === myRole) update(ref(db, `rooms/${roomId}/${myRole}`), { swinging: true });
+            }
+            update(keys) {
+                if (!this.alive) return;
+                if (this.swingCooldown > 0) this.swingCooldown--;
+                this.velocity.y -= 0.015; this.mesh.position.add(this.velocity);
+                const d = Math.sqrt(this.mesh.position.x**2 + this.mesh.position.z**2);
+                if (this.mesh.position.y < 0.2 && d >= arenaRadius && d < arenaRadius + 1) {
+                    const s = new THREE.Vector3(this.mesh.position.x, 0, this.mesh.position.z).normalize();
+                    this.velocity.x += s.x * 0.05; this.velocity.z += s.z * 0.05; this.onGround = false;
+                }
+                if (this.mesh.position.y < 0 && d < arenaRadius) { this.mesh.position.y = 0; this.velocity.y = 0; this.onGround = true; }
+                else if (this.mesh.position.y < -10) this.eliminate();
+
+                let move = new THREE.Vector3();
+                if (this.isPlayer) {
+                    if (keys.up) move.z -= 0.15; if (keys.down) move.z += 0.15;
+                    if (keys.left) move.x -= 0.15; if (keys.right) move.x += 0.15;
+                    if (keys.jump && this.onGround) { this.velocity.y = 0.3; this.onGround = false; }
+                } else if (!isOnline) {
+                    const t = agents[0].mesh.position; const toT = new THREE.Vector3().subVectors(t, this.mesh.position);
+                    if (toT.length() > 2) { toT.y = 0; move.add(toT.normalize().multiplyScalar(0.08)); }
+                    else { this.swing(); if (this.onGround && Math.random() < 0.02) { this.velocity.y = 0.25; this.onGround = false; } }
+                    if (d > arenaRadius * 0.7) move.add(new THREE.Vector3(-this.mesh.position.x, 0, -this.mesh.position.z).normalize().multiplyScalar(0.06));
+                }
+                this.mesh.position.add(move);
+                if (move.length() > 0.01) this.mesh.rotation.y = Math.atan2(move.x, move.z);
+                if (this.isSwinging) {
+                    this.swingTime += 0.2; this.batPivot.rotation.y = Math.sin(this.swingTime * 2) * 2;
+                    agents.forEach(o => {
+                        if (o !== this && o.alive && this.mesh.position.distanceTo(o.mesh.position) < 2.5 && this.swingTime > 0.5 && this.swingTime < 1.0) {
+                            const p = new THREE.Vector3().subVectors(o.mesh.position, this.mesh.position).normalize();
+                            o.velocity.x = p.x * 0.4; o.velocity.z = p.z * 0.4; o.velocity.y = 0.15; this.isSwinging = false;
+                            if (isOnline && this.role === myRole) update(ref(db, `rooms/${roomId}/${o.role}`), { vx: o.velocity.x, vy: o.velocity.y, vz: o.velocity.z });
+                        }
+                    });
+                    if (this.swingTime > 2) { this.isSwinging = false; this.batPivot.rotation.y = 0; }
+                }
+                this.velocity.x *= 0.95; this.velocity.z *= 0.95;
+                if (isOnline && this.role === myRole && roomId) update(ref(db, `rooms/${roomId}/${myRole}`), { x: this.mesh.position.x, y: this.mesh.position.y, z: this.mesh.position.z, ry: this.mesh.rotation.y, swinging: this.isSwinging, name: nickname });
+            }
+            eliminate() { this.alive = false; this.mesh.visible = false; setTimeout(() => location.reload(), 2000); }
+        }
+
+        const p1 = new Fighter(0x0984e3, "P1", true, new THREE.Vector3(-5, 5, 0), 'p1');
+        const p2 = new Fighter(0xd63031, "P2", false, new THREE.Vector3(5, 5, 0), 'p2');
+
+        const input = { up: false, down: false, left: false, right: false, jump: false };
+        window.onkeydown = e => { if(e.code==='KeyW'||e.code==='ArrowUp') input.up=true; if(e.code==='KeyS'||e.code==='ArrowDown') input.down=true; if(e.code==='KeyA'||e.code==='ArrowLeft') input.left=true; if(e.code==='KeyD'||e.code==='ArrowRight') input.right=true; if(e.code==='Space') input.jump=true; };
+        window.onkeyup = e => { if(e.code==='KeyW'||e.code==='ArrowUp') input.up=false; if(e.code==='KeyS'||e.code==='ArrowDown') input.down=false; if(e.code==='KeyA'||e.code==='ArrowLeft') input.left=false; if(e.code==='KeyD'||e.code==='ArrowRight') input.right=false; if(e.code==='Space') input.jump=false; };
+        window.onmousedown = () => { if(gameState==='PLAYING') (myRole==='p1'?p1:p2).swing(); };
+
+        const isMob = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if(isMob) {
+            document.getElementById('mobile-controls').style.display = 'block';
+            const joy = document.getElementById('joystick-base'), knob = document.getElementById('joystick-knob');
+            joy.ontouchmove = e => {
+                const r = joy.getBoundingClientRect(); const t = e.touches[0];
+                const dx = t.clientX - (r.left + r.width/2), dy = t.clientY - (r.top + r.height/2);
+                const d = Math.min(50, Math.sqrt(dx*dx + dy*dy)); const a = Math.atan2(dy, dx);
+                knob.style.transform = `translate(${Math.cos(a)*d}px, ${Math.sin(a)*d}px)`;
+                input.left = dx < -15; input.right = dx > 15; input.up = dy < -15; input.down = dy > 15;
+            };
+            joy.ontouchend = () => { knob.style.transform = ''; input.up=input.down=input.left=input.right=false; };
+            document.getElementById('action-btn').ontouchstart = (e) => { e.preventDefault(); if(gameState==='PLAYING') (myRole==='p1'?p1:p2).swing(); };
+        }
+
+        const showM = id => { document.querySelectorAll('.menu-card').forEach(m => m.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); };
+        document.getElementById('nav-play').onclick = () => showM('menu-play');
+        document.getElementById('nav-settings').onclick = () => showM('menu-settings');
+        document.getElementById('nav-room').onclick = () => showM('menu-room');
+        document.querySelectorAll('.nav-to-main').forEach(b => b.onclick = () => { nickname = document.getElementById('nick-input').value; lang = document.getElementById('lang-select').value; applyL(); showM('menu-main'); });
+        document.querySelector('.nav-to-play').onclick = () => showM('menu-play');
+        const applyL = () => { const t = i18n[lang]; document.getElementById('txt-title').innerText = t.title; document.getElementById('nav-play').innerText = t.play; document.getElementById('nav-settings').innerText = t.settings; document.getElementById('btn-cpu').innerText = t.cpu; document.getElementById('nav-room').innerText = t.room; document.getElementById('btn-create').innerText = t.create; document.getElementById('btn-join').innerText = t.join; document.querySelectorAll('.btn-back').forEach(b => b.innerText = t.back); document.getElementById('txt-nick').innerText = t.nick; document.getElementById('txt-lang').innerText = t.lang; };
+
+        document.getElementById('btn-cpu').onclick = () => { isOnline=false; p1.isPlayer=true; p2.isPlayer=false; startGame(); };
+        document.getElementById('btn-create').onclick = async () => {
+            roomId = Math.floor(10000 + Math.random() * 90000).toString();
+            isOnline = true; myRole = 'p1'; p1.isPlayer = true; p2.isPlayer = false;
+            document.getElementById('room-id-display').innerText = `ID: ${roomId}\n${i18n[lang].wait}`;
+            await set(ref(db, `rooms/${roomId}`), { p1: { active: true, name: nickname }, p2: { active: false } });
+            onDisconnect(ref(db, `rooms/${roomId}/p1`)).remove();
+            onValue(ref(db, `rooms/${roomId}/p2/active`), s => { if(s.val()) startGame(); });
+            syncO();
+        };
+        document.getElementById('btn-join').onclick = async () => {
+            roomId = document.getElementById('room-input').value; if(!roomId) return;
+            isOnline = true; myRole = 'p2'; p1.isPlayer = false; p2.isPlayer = true;
+            await update(ref(db, `rooms/${roomId}/p2`), { active: true, name: nickname });
+            onDisconnect(ref(db, `rooms/${roomId}/p2`)).remove();
+            syncO(); startGame();
+        };
+
+        function syncO() {
+            const o = (myRole==='p1')?p2:p1;
+            onValue(ref(db, `rooms/${roomId}/${(myRole==='p1')?'p2':'p1'}`), s => {
+                const d = s.val(); if(!d) return;
+                if(d.x!==undefined){ o.mesh.position.set(d.x, d.y, d.z); o.mesh.rotation.y = d.ry; if(d.swinging && !o.isSwinging) o.swing(); }
+                const me = (myRole==='p1')?p1:p2;
+                if(d.vx!==undefined){ me.velocity.set(d.vx, d.vy, d.vz); update(ref(db, `rooms/${roomId}/${myRole}`), {vx:null, vy:null, vz:null}); }
+            });
+        }
+        const startGame = () => { gameState = 'PLAYING'; document.getElementById('overlay').classList.add('hidden'); };
+        function animate() {
+            requestAnimationFrame(animate);
+            if (gameState === 'PLAYING') { if (isOnline) (myRole==='p1'?p1:p2).update(input); else { p1.update(input); p2.update(input); } }
+            const mid = new THREE.Vector3().addVectors(p1.mesh.position, p2.mesh.position).multiplyScalar(0.5);
+            camera.position.lerp(new THREE.Vector3(mid.x, 15, mid.z + 20), 0.1); camera.lookAt(mid);
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
