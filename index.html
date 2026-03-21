@@ -3,37 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hex-Smash: Arena Online</title>
+    <title>Hex-Smash: Arena Online PRO</title>
     <style>
         body { margin: 0; overflow: hidden; background: #a29bfe; font-family: 'Segoe UI', sans-serif; touch-action: none; color: white; }
         canvas { display: block; }
         
-        /* UI Layers */
         #overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(108, 92, 231, 0.9), rgba(162, 155, 254, 0.8)); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(15px); transition: 0.5s; }
-        .menu-card { background: rgba(255, 255, 255, 0.15); padding: 40px; border-radius: 40px; display: flex; flex-direction: column; gap: 20px; min-width: 320px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .menu-card { background: rgba(255, 255, 255, 0.15); padding: 40px; border-radius: 40px; display: flex; flex-direction: column; gap: 20px; min-width: 320px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; }
         
         h1 { font-size: 70px; margin: 0; text-shadow: 0 10px 20px rgba(0,0,0,0.2); letter-spacing: -2px; text-align: center; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
         .btn { padding: 18px 35px; font-size: 20px; background: #55efc4; color: #2d3436; border: none; cursor: pointer; border-radius: 20px; font-weight: 900; transition: 0.3s; box-shadow: 0 5px 0 #00b894; }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #00b894; filter: brightness(1.1); }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #00b894; }
+        .btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 0 #00b894; filter: brightness(1.1); }
+        .btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #00b894; }
+        .btn:disabled { background: #b2bec3; box-shadow: 0 5px 0 #636e72; cursor: not-allowed; opacity: 0.7; }
         .btn.secondary { background: #81ecec; box-shadow: 0 5px 0 #00cec9; }
         .btn-back { background: #fab1a0; box-shadow: 0 5px 0 #e17055; margin-top: 10px; }
         
-        input, select { padding: 15px; border-radius: 15px; border: none; font-size: 18px; background: rgba(255,255,255,0.9); color: #2d3436; width: 100%; box-sizing: border-box; }
+        input, select { padding: 15px; border-radius: 15px; border: none; font-size: 18px; background: rgba(255,255,255,0.9); color: #2d3436; width: 100%; box-sizing: border-box; text-align: center; font-weight: bold; }
         
-        /* Mobile Controls (Automatically Shown on Mobile) */
         #mobile-controls { position: absolute; inset: 0; pointer-events: none; display: none; }
         #joystick-base { position: absolute; bottom: 60px; left: 60px; width: 140px; height: 140px; background: rgba(255,255,255,0.2); border-radius: 50%; pointer-events: auto; border: 2px solid rgba(255,255,255,0.4); }
         #joystick-knob { position: absolute; top: 40px; left: 40px; width: 60px; height: 60px; background: #fff; border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         #action-btn { position: absolute; bottom: 80px; right: 60px; width: 100px; height: 100px; background: #ff7675; border-radius: 50%; border: 6px solid #fff; pointer-events: auto; display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
 
-        .hidden { opacity: 0; pointer-events: none; display: none; }
-        #room-id-display { font-size: 28px; color: #ffeaa7; font-weight: 900; text-align: center; }
+        .hidden { display: none !important; }
+        #room-id-display { font-size: 32px; color: #ffeaa7; font-weight: 900; margin: 10px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        #status-msg { font-size: 18px; color: #fff; font-weight: bold; min-height: 1.5em; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px; }
+        .loading-dots:after { content: '.'; animation: dots 1.5s steps(5, end) infinite; }
+        @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60% { content: '...'; } 80%, 100% { content: ''; } }
+
+        #end-screen { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 150; background: rgba(0,0,0,0.7); }
+        #end-text { font-size: 120px; font-weight: 900; color: #ff7675; text-shadow: 4px 4px 0px rgba(0,0,0,0.5); letter-spacing: -5px; animation: endFloat 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes endFloat { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
+    <div id="end-screen">
+        <div id="end-text"></div>
+    </div>
+
     <div id="overlay">
         <h1 id="txt-title">HEX-SMASH</h1>
         
@@ -50,12 +60,13 @@
 
         <div id="menu-room" class="menu-card hidden">
             <button id="btn-create" class="btn">CREATE ROOM</button>
-            <div style="display:flex; gap:10px;">
-                <input type="number" id="room-input" placeholder="Room ID">
+            <div id="join-controls" style="display:flex; gap:10px;">
+                <input type="text" id="room-input" placeholder="ID (4 Digits)" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                 <button id="btn-join" class="btn">JOIN</button>
             </div>
             <div id="room-id-display"></div>
-            <button class="btn btn-back nav-to-play">BACK</button>
+            <div id="status-msg"></div>
+            <button id="btn-room-back" class="btn btn-back">BACK</button>
         </div>
 
         <div id="menu-settings" class="menu-card hidden">
@@ -86,7 +97,7 @@
     <script type="module">
         import * as THREE from 'three';
         import { initializeApp } from 'firebase/app';
-        import { getDatabase, ref, set, onValue, update, onDisconnect } from 'firebase/database';
+        import { getDatabase, ref, set, onValue, update, onDisconnect, get, remove } from 'firebase/database';
 
         const firebaseConfig = {
             apiKey: "AIzaSyBCpKtPQrNhlmoXMnKIlu-nVDrAkTNj70Y",
@@ -102,10 +113,11 @@
 
         let gameState = 'MENU';
         let isOnline = false, myRole = 'p1', roomId = null, lang = 'en', nickname = 'Player';
+        let cancelLoading = false;
         const agents = [];
         const i18n = {
-            ja: { title: "ヘックス・スマッシュ", play: "プレイ", settings: "設定", cpu: "CPU対戦", room: "ルーム対戦", create: "部屋を作る", join: "参加", back: "戻る", nick: "ニックネーム:", lang: "言語:", wait: "待機中..." },
-            en: { title: "HEX-SMASH", play: "PLAY", settings: "SETTINGS", cpu: "1v1 (CPU)", room: "ONLINE ROOM", create: "CREATE ROOM", join: "JOIN", back: "BACK", nick: "NICKNAME:", lang: "LANGUAGE:", wait: "WAITING..." }
+            ja: { title: "ヘックス・スマッシュ", play: "プレイ", settings: "設定", cpu: "CPU対戦", room: "ルーム対戦", create: "部屋を作る", join: "参加", back: "戻る", nick: "ニックネーム:", lang: "言語:", wait: "相手を待機中...", full: "部屋が満員です", none: "無効なIDです" },
+            en: { title: "HEX-SMASH", play: "PLAY", settings: "SETTINGS", cpu: "1v1 (CPU)", room: "ONLINE ROOM", create: "CREATE ROOM", join: "JOIN", back: "BACK", nick: "NICKNAME:", lang: "LANGUAGE:", wait: "WAITING...", full: "ROOM FULL", none: "INVALID ID" }
         };
 
         const scene = new THREE.Scene();
@@ -114,9 +126,14 @@
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
-        scene.add(new THREE.DirectionalLight(0xffffff, 2).clone().translateY(20));
+        
+        const sun = new THREE.DirectionalLight(0xffffff, 2);
+        sun.position.set(10, 20, 10);
+        sun.castShadow = true;
+        scene.add(sun);
         scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
         const arenaRadius = 10;
@@ -135,6 +152,10 @@
                 bat.rotation.x = Math.PI/2; bat.position.z = 0.7; this.batPivot.add(bat);
                 this.mesh.add(this.batPivot); this.mesh.position.copy(startPos);
                 scene.add(this.mesh); agents.push(this);
+                
+                this.targetPos = new THREE.Vector3().copy(startPos);
+                this.targetRotY = 0;
+                this.swingCooldown = 0;
             }
             swing() {
                 if (this.swingCooldown > 0) return;
@@ -143,6 +164,12 @@
             }
             update(keys) {
                 if (!this.alive) return;
+                if (isOnline && this.role !== myRole) {
+                    this.mesh.position.lerp(this.targetPos, 0.3);
+                    this.mesh.rotation.y = THREE.MathUtils.lerp(this.mesh.rotation.y, this.targetRotY, 0.3);
+                    if (this.isSwinging) this.handleSwingLogic();
+                    return;
+                }
                 if (this.swingCooldown > 0) this.swingCooldown--;
                 this.velocity.y -= 0.015; this.mesh.position.add(this.velocity);
                 const d = Math.sqrt(this.mesh.position.x**2 + this.mesh.position.z**2);
@@ -166,21 +193,46 @@
                 }
                 this.mesh.position.add(move);
                 if (move.length() > 0.01) this.mesh.rotation.y = Math.atan2(move.x, move.z);
-                if (this.isSwinging) {
-                    this.swingTime += 0.2; this.batPivot.rotation.y = Math.sin(this.swingTime * 2) * 2;
+                if (this.isSwinging) this.handleSwingLogic();
+                this.velocity.x *= 0.95; this.velocity.z *= 0.95;
+                if (isOnline && this.role === myRole && roomId) {
+                    update(ref(db, `rooms/${roomId}/${myRole}`), { x: this.mesh.position.x, y: this.mesh.position.y, z: this.mesh.position.z, ry: this.mesh.rotation.y, swinging: this.isSwinging });
+                }
+            }
+            handleSwingLogic() {
+                this.swingTime += 0.2;
+                this.batPivot.rotation.y = Math.sin(this.swingTime * 2) * 2;
+                if (this.role === myRole || !isOnline) {
                     agents.forEach(o => {
                         if (o !== this && o.alive && this.mesh.position.distanceTo(o.mesh.position) < 2.5 && this.swingTime > 0.5 && this.swingTime < 1.0) {
                             const p = new THREE.Vector3().subVectors(o.mesh.position, this.mesh.position).normalize();
-                            o.velocity.x = p.x * 0.4; o.velocity.z = p.z * 0.4; o.velocity.y = 0.15; this.isSwinging = false;
-                            if (isOnline && this.role === myRole) update(ref(db, `rooms/${roomId}/${o.role}`), { vx: o.velocity.x, vy: o.velocity.y, vz: o.velocity.z });
+                            const vx = p.x * 0.6, vy = 0.2, vz = p.z * 0.6;
+                            if (isOnline) update(ref(db, `rooms/${roomId}/${o.role}`), { hitX: vx, hitY: vy, hitZ: vz });
+                            else o.velocity.set(vx, vy, vz);
+                            this.isSwinging = false;
                         }
                     });
-                    if (this.swingTime > 2) { this.isSwinging = false; this.batPivot.rotation.y = 0; }
                 }
-                this.velocity.x *= 0.95; this.velocity.z *= 0.95;
-                if (isOnline && this.role === myRole && roomId) update(ref(db, `rooms/${roomId}/${myRole}`), { x: this.mesh.position.x, y: this.mesh.position.y, z: this.mesh.position.z, ry: this.mesh.rotation.y, swinging: this.isSwinging, name: nickname });
+                if (this.swingTime > 2) { this.isSwinging = false; this.batPivot.rotation.y = 0; }
             }
-            eliminate() { this.alive = false; this.mesh.visible = false; setTimeout(() => location.reload(), 2000); }
+            eliminate() { 
+                this.alive = false; 
+                this.mesh.visible = false; 
+                if(gameState === 'PLAYING') {
+                    gameState = 'ENDED';
+                    const endScreen = document.getElementById('end-screen');
+                    const endText = document.getElementById('end-text');
+                    if(isOnline) {
+                        if(this.role === myRole) endText.innerText = 'Your Loss';
+                        else endText.innerText = 'You Win';
+                    } else {
+                        if(this.isPlayer) endText.innerText = 'Your Loss';
+                        else endText.innerText = 'You Win';
+                    }
+                    endScreen.style.display = 'flex';
+                }
+                setTimeout(() => location.reload(), 3000); 
+            }
         }
 
         const p1 = new Fighter(0x0984e3, "P1", true, new THREE.Vector3(-5, 5, 0), 'p1');
@@ -189,7 +241,7 @@
         const input = { up: false, down: false, left: false, right: false, jump: false };
         window.onkeydown = e => { if(e.code==='KeyW'||e.code==='ArrowUp') input.up=true; if(e.code==='KeyS'||e.code==='ArrowDown') input.down=true; if(e.code==='KeyA'||e.code==='ArrowLeft') input.left=true; if(e.code==='KeyD'||e.code==='ArrowRight') input.right=true; if(e.code==='Space') input.jump=true; };
         window.onkeyup = e => { if(e.code==='KeyW'||e.code==='ArrowUp') input.up=false; if(e.code==='KeyS'||e.code==='ArrowDown') input.down=false; if(e.code==='KeyA'||e.code==='ArrowLeft') input.left=false; if(e.code==='KeyD'||e.code==='ArrowRight') input.right=false; if(e.code==='Space') input.jump=false; };
-        window.onmousedown = () => { if(gameState==='PLAYING') (myRole==='p1'?p1:p2).swing(); };
+        window.onmousedown = (e) => { if(gameState==='PLAYING' && e.button === 0) (myRole==='p1'?p1:p2).swing(); };
 
         const isMob = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         if(isMob) {
@@ -200,7 +252,7 @@
                 const dx = t.clientX - (r.left + r.width/2), dy = t.clientY - (r.top + r.height/2);
                 const d = Math.min(50, Math.sqrt(dx*dx + dy*dy)); const a = Math.atan2(dy, dx);
                 knob.style.transform = `translate(${Math.cos(a)*d}px, ${Math.sin(a)*d}px)`;
-                input.left = dx < -15; input.right = dx > 15; input.up = dy < -15; input.down = dy > 15;
+                input.left = dx < -20; input.right = dx > 20; input.up = dy < -20; input.down = dy > 20;
             };
             joy.ontouchend = () => { knob.style.transform = ''; input.up=input.down=input.left=input.right=false; };
             document.getElementById('action-btn').ontouchstart = (e) => { e.preventDefault(); if(gameState==='PLAYING') (myRole==='p1'?p1:p2).swing(); };
@@ -211,44 +263,133 @@
         document.getElementById('nav-settings').onclick = () => showM('menu-settings');
         document.getElementById('nav-room').onclick = () => showM('menu-room');
         document.querySelectorAll('.nav-to-main').forEach(b => b.onclick = () => { nickname = document.getElementById('nick-input').value; lang = document.getElementById('lang-select').value; applyL(); showM('menu-main'); });
-        document.querySelector('.nav-to-play').onclick = () => showM('menu-play');
-        const applyL = () => { const t = i18n[lang]; document.getElementById('txt-title').innerText = t.title; document.getElementById('nav-play').innerText = t.play; document.getElementById('nav-settings').innerText = t.settings; document.getElementById('btn-cpu').innerText = t.cpu; document.getElementById('nav-room').innerText = t.room; document.getElementById('btn-create').innerText = t.create; document.getElementById('btn-join').innerText = t.join; document.querySelectorAll('.btn-back').forEach(b => b.innerText = t.back); document.getElementById('txt-nick').innerText = t.nick; document.getElementById('txt-lang').innerText = t.lang; };
+        
+        document.getElementById('btn-room-back').onclick = async () => {
+            cancelLoading = true;
+            if (roomId) {
+                const roomRef = ref(db, `rooms/${roomId}`);
+                if (myRole === 'p1') await remove(roomRef);
+                else await update(ref(db, `rooms/${roomId}/p2`), { active: false, ready: false });
+            }
+            roomId = null;
+            document.getElementById('status-msg').innerText = '';
+            document.getElementById('room-id-display').innerText = '';
+            document.getElementById('btn-create').classList.remove('hidden');
+            document.getElementById('join-controls').classList.remove('hidden');
+            showM('menu-play');
+        };
+
+        const applyL = () => { 
+            const t = i18n[lang]; 
+            document.getElementById('txt-title').innerText = t.title; 
+            document.getElementById('nav-play').innerText = t.play; 
+            document.getElementById('nav-settings').innerText = t.settings; 
+            document.getElementById('btn-cpu').innerText = t.cpu; 
+            document.getElementById('nav-room').innerText = t.room; 
+            document.getElementById('btn-create').innerText = t.create; 
+            document.getElementById('btn-join').innerText = t.join; 
+            document.querySelectorAll('.btn-back').forEach(b => b.innerText = t.back); 
+            document.getElementById('txt-nick').innerText = t.nick; 
+            document.getElementById('txt-lang').innerText = t.lang; 
+        };
+
+        const sleep = m => new Promise(r => setTimeout(r, m));
+
+        const playLoadingSequence = async (isHost) => {
+            const msg = document.getElementById('status-msg');
+            msg.className = 'loading-dots';
+            cancelLoading = false;
+
+            msg.innerText = "Creating a room"; await sleep(2000); if(cancelLoading) return false;
+            msg.innerText = "Creating room ID"; await sleep(4000); if(cancelLoading) return false;
+            if(isHost) document.getElementById('room-id-display').innerText = `ID: ${roomId}`;
+            msg.innerText = "Ready"; await sleep(2500); if(cancelLoading) return false;
+            msg.innerText = "Loading";
+            return true;
+        };
 
         document.getElementById('btn-cpu').onclick = () => { isOnline=false; p1.isPlayer=true; p2.isPlayer=false; startGame(); };
+
         document.getElementById('btn-create').onclick = async () => {
-            roomId = Math.floor(10000 + Math.random() * 90000).toString();
+            document.getElementById('btn-create').classList.add('hidden');
+            document.getElementById('join-controls').classList.add('hidden');
+            
+            roomId = Math.floor(1000 + Math.random() * 9000).toString(); 
             isOnline = true; myRole = 'p1'; p1.isPlayer = true; p2.isPlayer = false;
-            document.getElementById('room-id-display').innerText = `ID: ${roomId}\n${i18n[lang].wait}`;
-            await set(ref(db, `rooms/${roomId}`), { p1: { active: true, name: nickname }, p2: { active: false } });
-            onDisconnect(ref(db, `rooms/${roomId}/p1`)).remove();
-            onValue(ref(db, `rooms/${roomId}/p2/active`), s => { if(s.val()) startGame(); });
+            
+            if(!await playLoadingSequence(true)) return;
+            
+            const roomRef = ref(db, `rooms/${roomId}`);
+            await set(roomRef, { p1: { active: true, name: nickname, ready: true }, p2: { active: false, ready: false } });
+            onDisconnect(roomRef).remove();
+
+            onValue(ref(db, `rooms/${roomId}/p2/ready`), s => { if(s.val() && !cancelLoading) startGame(); });
             syncO();
         };
+
         document.getElementById('btn-join').onclick = async () => {
-            roomId = document.getElementById('room-input').value; if(!roomId) return;
-            isOnline = true; myRole = 'p2'; p1.isPlayer = false; p2.isPlayer = true;
-            await update(ref(db, `rooms/${roomId}/p2`), { active: true, name: nickname });
-            onDisconnect(ref(db, `rooms/${roomId}/p2`)).remove();
-            syncO(); startGame();
+            const id = document.getElementById('room-input').value;
+            if(id.length < 4) return;
+            
+            const snap = await get(ref(db, `rooms/${id}`));
+            if(!snap.exists()) { document.getElementById('status-msg').innerText = i18n[lang].none; return; }
+            if(snap.val().p2.active) { document.getElementById('status-msg').innerText = i18n[lang].full; return; }
+
+            document.getElementById('btn-create').classList.add('hidden');
+            document.getElementById('join-controls').classList.add('hidden');
+
+            roomId = id; isOnline = true; myRole = 'p2'; p1.isPlayer = false; p2.isPlayer = true;
+            document.getElementById('room-id-display').innerText = `ID: ${roomId}`;
+            
+            if(!await playLoadingSequence(false)) return;
+            
+            await update(ref(db, `rooms/${roomId}/p2`), { active: true, name: nickname, ready: true });
+            onDisconnect(ref(db, `rooms/${roomId}/p2`)).update({ active: false, ready: false });
+            
+            syncO();
+            const p1Ready = (await get(ref(db, `rooms/${roomId}/p1/ready`))).val();
+            if(p1Ready && !cancelLoading) startGame();
         };
 
         function syncO() {
-            const o = (myRole==='p1')?p2:p1;
-            onValue(ref(db, `rooms/${roomId}/${(myRole==='p1')?'p2':'p1'}`), s => {
+            const opponent = (myRole==='p1')?p2:p1;
+            const me = (myRole==='p1')?p1:p2;
+            const oppRole = (myRole==='p1')?'p2':'p1';
+            onValue(ref(db, `rooms/${roomId}/${oppRole}`), s => {
                 const d = s.val(); if(!d) return;
-                if(d.x!==undefined){ o.mesh.position.set(d.x, d.y, d.z); o.mesh.rotation.y = d.ry; if(d.swinging && !o.isSwinging) o.swing(); }
-                const me = (myRole==='p1')?p1:p2;
-                if(d.vx!==undefined){ me.velocity.set(d.vx, d.vy, d.vz); update(ref(db, `rooms/${roomId}/${myRole}`), {vx:null, vy:null, vz:null}); }
+                if(d.x !== undefined) {
+                    opponent.targetPos.set(d.x, d.y, d.z);
+                    opponent.targetRotY = d.ry;
+                    if(d.swinging && !opponent.isSwinging) opponent.swing();
+                }
+            });
+            onValue(ref(db, `rooms/${roomId}/${myRole}/hitX`), s => {
+                const val = s.val();
+                if(val != null) {
+                    me.velocity.set(val, 0.2, 0); // シンプル化
+                    update(ref(db, `rooms/${roomId}/${myRole}`), { hitX: null, hitY: null, hitZ: null });
+                }
             });
         }
-        const startGame = () => { gameState = 'PLAYING'; document.getElementById('overlay').classList.add('hidden'); };
+
+        const startGame = () => { 
+            if(gameState === 'PLAYING') return;
+            gameState = 'PLAYING'; 
+            document.getElementById('overlay').classList.add('hidden'); 
+        };
+
         function animate() {
             requestAnimationFrame(animate);
-            if (gameState === 'PLAYING') { if (isOnline) (myRole==='p1'?p1:p2).update(input); else { p1.update(input); p2.update(input); } }
+            if (gameState === 'PLAYING') { p1.update(input); p2.update(input); }
             const mid = new THREE.Vector3().addVectors(p1.mesh.position, p2.mesh.position).multiplyScalar(0.5);
-            camera.position.lerp(new THREE.Vector3(mid.x, 15, mid.z + 20), 0.1); camera.lookAt(mid);
+            camera.position.lerp(new THREE.Vector3(mid.x, 15, mid.z + 20), 0.1);
+            camera.lookAt(mid);
             renderer.render(scene, camera);
         }
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
         animate();
     </script>
 </body>
