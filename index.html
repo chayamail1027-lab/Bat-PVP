@@ -10,14 +10,40 @@
 :root{--sky:#4fc3f7;--coral:#FF6B6B;--mint:#6BCB77;--card-bg:rgba(255,255,255,0.92);--card-shadow:0 8px 32px rgba(0,0,0,0.13);--btn-radius:16px;--text-dark:#2c3e50;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{overflow:hidden;background:#87ceeb;font-family:'Nunito',sans-serif;touch-action:none;color:var(--text-dark);width:100vw;height:100vh;-webkit-tap-highlight-color:transparent;}
-canvas{display:block;width:100%!important;height:100%!important;}
-#overlay{position:absolute;inset:0;background:linear-gradient(160deg,#a8edea 0%,#fed6e3 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:100;}
+canvas{display:block;}
+
+/* ===== OVERLAY ===== */
+#overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:100;}
+#demo-canvas-wrap{position:absolute;inset:0;z-index:0;overflow:hidden;}
+#demo-canvas-wrap canvas{opacity:0.35;filter:blur(1.5px);width:100%!important;height:100%!important;}
+#overlay-gradient{position:absolute;inset:0;z-index:1;background:linear-gradient(160deg,rgba(168,237,234,0.72) 0%,rgba(254,214,227,0.72) 100%);}
+.menu-content{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;}
+
+/* ===== COUNTDOWN ===== */
+#countdown-wrap{
+  position:absolute;inset:0;z-index:300;
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+  background:rgba(0,0,0,0.18);
+  pointer-events:none;
+}
+#countdown-wrap.active{display:flex;}
+#countdown-num{
+  font-family:'Fredoka One',cursive;
+  font-size:160px;color:#fff;
+  text-shadow:0 6px 0 rgba(0,0,0,0.18),0 0 60px rgba(255,255,255,0.5);
+  animation:cdPop .45s cubic-bezier(.175,.885,.32,1.275) both;
+  line-height:1;
+}
+#countdown-num.go{font-size:100px;color:var(--mint);text-shadow:0 6px 0 #388e3c,0 0 60px rgba(107,203,119,0.6);}
+@keyframes cdPop{0%{transform:scale(2.5);opacity:0}60%{transform:scale(0.9)}100%{transform:scale(1);opacity:1}}
+
 .game-title{font-family:'Fredoka One',cursive;font-size:64px;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.1);letter-spacing:2px;animation:titleBounce 2.5s ease-in-out infinite;margin-bottom:6px;}
 .game-tagline{font-size:13px;font-weight:800;letter-spacing:5px;color:rgba(255,255,255,.75);text-transform:uppercase;margin-bottom:28px;}
 @keyframes titleBounce{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(1deg)}}
-.menu-card{background:var(--card-bg);border-radius:28px;padding:28px 32px;min-width:320px;max-width:400px;width:90vw;display:flex;flex-direction:column;gap:12px;box-shadow:var(--card-shadow);max-height:88vh;overflow-y:auto;}
+.menu-card{background:var(--card-bg);border-radius:28px;padding:28px 32px;min-width:320px;max-width:420px;width:90vw;display:flex;flex-direction:column;gap:12px;box-shadow:var(--card-shadow);max-height:88vh;overflow-y:auto;}
 .card-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--text-dark);text-align:center;margin-bottom:4px;}
-.btn{padding:14px 20px;font-family:'Fredoka One',cursive;font-size:18px;border:none;cursor:pointer;border-radius:var(--btn-radius);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden;min-height:52px;display:flex;align-items:center;justify-content:center;}
+.btn{padding:14px 20px;font-family:'Fredoka One',cursive;font-size:18px;border:none;cursor:pointer;border-radius:var(--btn-radius);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden;min-height:52px;display:flex;align-items:center;justify-content:center;gap:6px;}
 .btn:active{transform:scale(.97) translateY(2px);}
 .btn-primary{background:var(--coral);color:#fff;box-shadow:0 5px 0 #c0392b;}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 7px 0 #c0392b;}
@@ -28,22 +54,72 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .btn-back{background:#ecf0f1;color:#7f8c8d;box-shadow:0 4px 0 #bdc3c7;font-size:15px;padding:11px;}
 .btn-back:hover{background:#dfe6e9;}
 label{font-size:12px;font-weight:900;color:#95a5a6;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
-input,select{padding:11px 14px;border-radius:12px;border:2px solid #ecf0f1;font-size:15px;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text-dark);background:#fff;width:100%;transition:border-color .2s;}
-input:focus,select:focus{outline:none;border-color:var(--sky);}
+input[type=text],select{padding:11px 14px;border-radius:12px;border:2px solid #ecf0f1;font-size:15px;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text-dark);background:#fff;width:100%;transition:border-color .2s;}
+input[type=text]:focus,select:focus{outline:none;border-color:var(--sky);}
 input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ecf0f1;}
+
+/* ===== SKIN SECTION ===== */
 .skin-section-title{font-size:12px;font-weight:900;color:#95a5a6;letter-spacing:2px;text-transform:uppercase;margin-top:8px;}
-.skin-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:4px 0;}
-.skin-swatch{width:100%;aspect-ratio:1;border-radius:12px;cursor:pointer;border:3px solid transparent;transition:transform .15s,border-color .15s;position:relative;overflow:hidden;}
-.skin-swatch:hover{transform:scale(1.08);}
-.skin-swatch.selected{border-color:var(--text-dark);transform:scale(1.12);box-shadow:0 4px 12px rgba(0,0,0,.2);}
-.skin-swatch .swatch-check{display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:18px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4);}
-.skin-swatch.selected .swatch-check{display:flex;}
+.skin-preview-wrap{display:flex;gap:12px;align-items:center;background:#f5f6fa;border-radius:14px;padding:12px;margin:4px 0;}
+#skin-preview-canvas{border-radius:8px;image-rendering:pixelated;flex-shrink:0;}
+.skin-preview-info{flex:1;min-width:0;}
+.skin-preview-name{font-family:'Fredoka One',cursive;font-size:15px;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.skin-preview-hint{font-size:10px;color:#95a5a6;font-weight:700;margin-top:3px;line-height:1.4;}
+
+/* 5x4 grid = 20 slots */
+.skin-grid-20{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0;}
+.skin-slot{
+  aspect-ratio:3/4;border-radius:10px;cursor:pointer;
+  border:2.5px solid transparent;transition:transform .15s,border-color .15s;
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:#f0f2f5;
+}
+.skin-slot:hover{transform:scale(1.06);}
+.skin-slot.selected{border-color:var(--text-dark);transform:scale(1.1);box-shadow:0 3px 10px rgba(0,0,0,.2);}
+.skin-slot canvas{image-rendering:pixelated;width:85%;height:85%;object-fit:contain;}
+.skin-slot-add{background:#e8f4fd;border:2.5px dashed #90caf9;color:#64b5f6;font-size:24px;font-weight:900;cursor:pointer;}
+.skin-slot-add:hover{background:#d0e8f8;border-color:#42a5f5;transform:scale(1.06);}
+.skin-slot-default{border-color:#ecf0f1;}
+.skin-slot .slot-del{
+  position:absolute;top:3px;right:3px;
+  width:18px;height:18px;border-radius:50%;
+  background:rgba(231,76,60,0.85);color:#fff;
+  font-size:11px;font-weight:900;
+  display:none;align-items:center;justify-content:center;
+  cursor:pointer;z-index:5;line-height:1;
+}
+.skin-slot:hover .slot-del{display:flex;}
+.skin-slot-default .slot-del{display:none!important;}
+.skin-slot-add .slot-del{display:none!important;}
+.skin-count-label{font-size:11px;color:#95a5a6;font-weight:700;text-align:right;}
+
+#skin-upload-input{display:none;}
+
+/* ===== SKIN SITE LINK ===== */
+.skin-site-banner{
+  background:linear-gradient(135deg,#1a1a2e,#16213e);
+  border-radius:14px;padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+  cursor:pointer;transition:transform .15s;
+  text-decoration:none;
+}
+.skin-site-banner:hover{transform:translateY(-2px);}
+.skin-site-icon{font-size:24px;flex-shrink:0;}
+.skin-site-text{flex:1;}
+.skin-site-title{font-family:'Fredoka One',cursive;font-size:14px;color:#fff;}
+.skin-site-sub{font-size:10px;color:rgba(255,255,255,0.5);font-weight:700;letter-spacing:1px;margin-top:2px;}
+.skin-site-arrow{color:rgba(255,255,255,0.4);font-size:18px;}
+
+/* ===== BATTLE UI ===== */
 #battle-ui{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:95%;max-width:680px;display:none;justify-content:space-between;align-items:center;pointer-events:none;z-index:10;gap:10px;}
 .hud-card{background:rgba(255,255,255,.88);border-radius:14px;padding:8px 14px;font-family:'Fredoka One',cursive;font-size:14px;color:var(--text-dark);box-shadow:0 3px 10px rgba(0,0,0,.12);min-width:140px;text-align:center;}
 .hud-name{font-size:13px;margin-bottom:3px;color:#7f8c8d;font-family:'Nunito',sans-serif;font-weight:800;}
 .hud-stocks{display:flex;gap:5px;justify-content:center;}
 .stock-dot{width:14px;height:14px;border-radius:50%;background:var(--coral);transition:transform .2s,background .2s;}
 .stock-dot.empty{background:#dfe6e9;}
+
+/* ===== MOBILE ===== */
 #mobile-controls{position:absolute;inset:0;pointer-events:none;display:none;z-index:50;}
 #joystick-base{position:absolute;width:110px;height:110px;background:rgba(255,255,255,.3);border-radius:50%;pointer-events:none;border:2px solid rgba(255,255,255,.5);display:none;transform:translate(-50%,-50%);}
 #joystick-knob{position:absolute;top:30px;left:30px;width:50px;height:50px;background:#fff;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.2);}
@@ -53,6 +129,8 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
 .mob-btn:active{transform:scale(.93);}
 #action-btn{background:var(--coral);box-shadow:0 5px 0 #c0392b;}
 #jump-btn{background:var(--sky);box-shadow:0 5px 0 #0288d1;}
+
+/* ===== END SCREEN ===== */
 #end-screen{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;z-index:150;background:rgba(255,255,255,.82);backdrop-filter:blur(12px);gap:8px;cursor:pointer;}
 #end-text{font-family:'Fredoka One',cursive;font-size:72px;animation:endPop .5s cubic-bezier(.175,.885,.32,1.275) forwards;text-align:center;}
 #end-sub{font-size:16px;font-weight:800;color:#95a5a6;letter-spacing:3px;}
@@ -60,6 +138,8 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
 @keyframes endPop{0%{transform:scale(.4) rotate(-6deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
 .win-color{color:var(--mint);text-shadow:0 4px 0 #388e3c;}
 .lose-color{color:var(--coral);text-shadow:0 4px 0 #c0392b;}
+
+/* ===== RANKING ===== */
 .ranking-scroll{width:100%;max-height:320px;overflow-y:scroll;scrollbar-width:thin;scrollbar-color:#bdc3c7 #f5f6fa;}
 .ranking-scroll::-webkit-scrollbar{width:7px;}
 .ranking-scroll::-webkit-scrollbar-track{background:#f5f6fa;border-radius:4px;}
@@ -80,96 +160,22 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
 #hit-flash{position:absolute;inset:0;background:white;opacity:0;pointer-events:none;z-index:200;transition:opacity .08s;}
 .uid-box{background:#f5f6fa;border-radius:12px;padding:10px 14px;font-family:'Fredoka One',cursive;font-size:20px;letter-spacing:4px;color:var(--coral);text-align:center;border:2px solid #ecf0f1;user-select:all;}
 .uid-hint{font-size:11px;color:#bdc3c7;text-align:center;font-weight:700;letter-spacing:1px;}
-
-/* ===== NIGHTVISION OVERLAY ===== */
-#nv-overlay{position:absolute;inset:0;background:rgba(0,20,0,.72);pointer-events:none;z-index:180;display:none;}
-#nv-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.92) 100%);pointer-events:none;z-index:181;display:none;}
-
-/* ===== JUMPSCARE OVERLAY ===== */
-#js-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:400;pointer-events:none;background:rgba(0,0,0,.35);}
-#js-text{font-family:'Fredoka One',cursive;font-size:120px;color:#fff;text-shadow:0 0 40px #f00,0 0 80px #f00;letter-spacing:4px;animation:jsPop .15s ease-out forwards;}
-@keyframes jsPop{0%{transform:scale(.3) rotate(-8deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
-
-/* ===== ADMINI PANEL ===== */
-#admini-panel{
-  display:none;position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:660px;max-width:97vw;
-  z-index:300;border-radius:8px;overflow:hidden;
-  box-shadow:0 24px 64px rgba(0,0,0,.75);
-  font-family:'Nunito',sans-serif;
-  flex-direction:column;
-  border:1px solid rgba(255,255,255,.06);
-}
-#admini-panel.open{display:flex;}
-#admini-titlebar{
-  background:linear-gradient(90deg,#3d5a6a,#2e4555);
-  padding:10px 14px;display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid rgba(0,0,0,.4);
-}
-#admini-titlebar-title{font-size:15px;font-weight:900;color:#b8cdd8;letter-spacing:.5px;}
-#admini-close{background:#c0392b;color:#fff;border:none;cursor:pointer;border-radius:4px;width:26px;height:26px;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;transition:background .15s;}
-#admini-close:hover{background:#96281b;}
-#admini-body{background:#16232e;display:flex;flex:1;}
-/* LEFT: command input + grid */
-#admini-left{flex:1;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0;}
-#admini-cmd-label{font-size:10px;color:#4a6a7a;font-weight:900;letter-spacing:1px;}
-#admini-cmd-wrap{
-  background:#0e1c26;border:1px solid #253545;border-radius:5px;
-  padding:6px 10px;display:flex;align-items:center;
-}
-#admini-cmd-input{background:transparent;border:none;color:#9ab8c8;font-size:13px;font-family:'Nunito',sans-serif;font-weight:700;flex:1;min-width:0;}
-#admini-cmd-input::placeholder{color:#2a4050;}
-#admini-cmd-input:focus{outline:none;}
-#admini-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
-.admini-btn{
-  background:#0f1c28;border:1px solid #1e3040;border-radius:5px;
-  padding:8px 9px;color:#8ab0c0;font-size:12px;font-weight:800;
-  cursor:pointer;display:flex;align-items:center;justify-content:space-between;
-  transition:background .12s,border-color .12s;
-  font-family:'Nunito',sans-serif;user-select:none;position:relative;overflow:hidden;
-}
-.admini-btn:hover{background:#162433;border-color:#3a5870;}
-.admini-btn.active{background:linear-gradient(135deg,#8b1a10,#6a1208);border-color:#c0392b;color:#fff;}
-.admini-btn.cooling{background:#0a141e;border-color:#1a2a38;color:#3a5060;cursor:not-allowed;}
-.admini-btn-left{display:flex;align-items:center;gap:7px;}
-.admini-btn-name{font-size:12px;}
-.admini-btn-cd{font-size:10px;color:#c0392b;font-weight:900;min-width:28px;text-align:right;}
-.admini-cd-bar{position:absolute;bottom:0;left:0;height:2px;background:#c0392b;transition:width .1s linear;}
-/* RIGHT: player selector + player cards */
-#admini-right{
-  width:160px;background:#111e28;border-left:1px solid rgba(255,255,255,.05);
-  padding:10px 9px;display:flex;flex-direction:column;gap:8px;
-}
-#admini-right-title{font-size:10px;font-weight:900;letter-spacing:2px;color:#3a5a6a;text-transform:uppercase;text-align:center;padding-bottom:6px;border-bottom:1px solid #1e3040;}
-.admini-player-tab{
-  background:#0f1c28;border:2px solid #1e3040;border-radius:7px;
-  padding:8px 7px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;
-}
-.admini-player-tab:hover{background:#162433;border-color:#3a5870;}
-.admini-player-tab.selected{border-color:#c0392b;background:#1a0f0e;}
-.admini-player-tab.selected .ap-label{color:#e74c3c;}
-.ap-avatar{width:38px;height:38px;border-radius:50%;margin:0 auto 5px;border:2px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;}
-.ap-name{font-size:10px;font-weight:900;color:#8ab0c0;word-break:break-all;margin-bottom:2px;}
-.ap-stocks{font-size:12px;color:#c0392b;letter-spacing:1px;}
-.ap-label{font-size:9px;font-weight:900;color:#3a5a6a;letter-spacing:1px;text-transform:uppercase;margin-top:3px;}
-.ap-fx{font-size:8px;font-weight:900;color:#e74c3c;letter-spacing:.5px;margin-top:2px;min-height:10px;}
-
 @media(max-width:480px){
   .game-title{font-size:44px;}
   .menu-card{padding:20px 18px;min-width:unset;}
   #end-text{font-size:52px;}
-  #admini-right{display:none;}
-  #admini-panel{width:100vw;}
-  #js-text{font-size:72px;}
+  #countdown-num{font-size:110px;}
+  #countdown-num.go{font-size:72px;}
 }
 </style>
 </head>
 <body>
 <div id="hit-flash"></div>
-<div id="nv-overlay"></div>
-<div id="nv-vignette"></div>
-<div id="js-overlay"><div id="js-text">Hello!!</div></div>
+
+<!-- COUNTDOWN -->
+<div id="countdown-wrap">
+  <div id="countdown-num">3</div>
+</div>
 
 <div id="end-screen">
   <div id="end-text"></div>
@@ -182,121 +188,109 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
   <div class="hud-card" id="hud-p2"><div class="hud-name" id="tag-p2">P2</div><div class="hud-stocks" id="stocks-p2"></div></div>
 </div>
 
-<!-- ===== ADMINI PANEL ===== -->
-<div id="admini-panel">
-  <div id="admini-titlebar">
-    <span id="admini-titlebar-title">Admini Panel</span>
-    <button id="admini-close">X</button>
-  </div>
-  <div id="admini-body">
-    <div id="admini-left">
-      <div id="admini-cmd-label">Command Input</div>
-      <div id="admini-cmd-wrap"><input type="text" id="admini-cmd-input" placeholder="type command..."></div>
-      <div id="admini-grid">
-        <button class="admini-btn" data-cmd="rocket"><span class="admini-btn-left"><span class="admini-btn-name">;rocket</span></span><span class="admini-btn-cd" id="cd-rocket"></span><div class="admini-cd-bar" id="bar-rocket" style="width:0"></div></button>
-        <button class="admini-btn" data-cmd="ragdoll"><span class="admini-btn-left"><span class="admini-btn-name">;ragdoll</span></span><span class="admini-btn-cd" id="cd-ragdoll"></span><div class="admini-cd-bar" id="bar-ragdoll" style="width:0"></div></button>
-        <button class="admini-btn" data-cmd="balloon"><span class="admini-btn-left"><span class="admini-btn-name">;balloon</span></span><span class="admini-btn-cd" id="cd-balloon"></span><div class="admini-cd-bar" id="bar-balloon" style="width:0"></div></button>
-        <button class="admini-btn" data-cmd="inverse"><span class="admini-btn-left"><span class="admini-btn-name">;inverse</span></span><span class="admini-btn-cd" id="cd-inverse"></span><div class="admini-cd-bar" id="bar-inverse" style="width:0"></div></button>
-        <button class="admini-btn" data-cmd="nightvision"><span class="admini-btn-left"><span class="admini-btn-name">;nightvision</span></span><span class="admini-btn-cd" id="cd-nightvision"></span><div class="admini-cd-bar" id="bar-nightvision" style="width:0"></div></button>
-        <button class="admini-btn" data-cmd="jail"><span class="admini-btn-left"><span class="admini-btn-name">;jail</span></span><span class="admini-btn-cd" id="cd-jail"></span><div class="admini-cd-bar" id="bar-jail" style="width:0"></div></button>
-        <button class="admini-btn" data-cmd="control"><span class="admini-btn-left"><span class="admini-btn-name">;control</span></span><span class="admini-btn-cd" id="cd-control"></span><div class="admini-cd-bar" id="bar-control" style="width:0"></div></button>
-        <button class="admini-btn" data-cmd="tiny"><span class="admini-btn-left"><span class="admini-btn-name">;tiny</span></span><span class="admini-btn-cd" id="cd-tiny"></span><div class="admini-cd-bar" id="bar-tiny" style="width:0"></div></button>
-        <button class="admini-btn" data-cmd="jumpscare"><span class="admini-btn-left"><span class="admini-btn-name">;jumpscare</span></span><span class="admini-btn-cd" id="cd-jumpscare"></span><div class="admini-cd-bar" id="bar-jumpscare" style="width:0"></div></button>
-        <button class="admini-btn" data-cmd="morph"><span class="admini-btn-left"><span class="admini-btn-name">;morph</span></span><span class="admini-btn-cd" id="cd-morph"></span><div class="admini-cd-bar" id="bar-morph" style="width:0"></div></button>
-      </div>
-    </div>
-    <div id="admini-right">
-      <div id="admini-right-title">Players</div>
-      <!-- Self card -->
-      <div class="admini-player-tab" id="ap-self" data-target="self">
-        <div class="ap-avatar" id="ap-self-avatar"></div>
-        <div class="ap-name" id="ap-self-name">---</div>
-        <div class="ap-stocks" id="ap-self-stocks">---</div>
-        <div class="ap-label">SELF</div>
-        <div class="ap-fx" id="ap-self-fx"></div>
-      </div>
-      <!-- Opponent card -->
-      <div class="admini-player-tab selected" id="ap-opp" data-target="opp">
-        <div class="ap-avatar" id="ap-opp-avatar"></div>
-        <div class="ap-name" id="ap-opp-name">---</div>
-        <div class="ap-stocks" id="ap-opp-stocks">---</div>
-        <div class="ap-label">OPPONENT</div>
-        <div class="ap-fx" id="ap-opp-fx"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- MENUS -->
 <div id="overlay">
-  <div class="game-title" id="txt-title">BAT PVP</div>
-  <div class="game-tagline">chaya games</div>
-  <div id="menu-main" class="menu-card">
-    <button id="nav-play" class="btn btn-primary">PLAY</button>
-    <button id="nav-ranking" class="btn btn-secondary">RANKING</button>
-    <button id="nav-settings" class="btn btn-mint">SETTINGS</button>
-  </div>
-  <div id="menu-play" class="menu-card hidden">
-    <div class="card-title">SELECT MODE</div>
-    <button id="btn-cpu" class="btn btn-primary">1v1 vs CPU</button>
-    <button id="nav-match-select" class="btn btn-secondary">ONLINE</button>
-    <div class="divider"></div>
-    <button class="btn btn-back nav-to-main">BACK</button>
-  </div>
-  <div id="menu-match-select" class="menu-card hidden">
-    <div class="card-title">ONLINE</div>
-    <button id="btn-matchmaking" class="btn btn-primary">QUICK MATCH</button>
-    <button id="nav-room" class="btn btn-secondary">ROOM</button>
-    <div class="divider"></div>
-    <button id="btn-match-back" class="btn btn-back">BACK</button>
-  </div>
-  <div id="menu-room" class="menu-card hidden">
-    <div class="card-title">ROOM</div>
-    <button id="btn-create" class="btn btn-primary">CREATE ROOM</button>
-    <div id="join-controls" style="display:flex;gap:8px;">
-      <input type="text" id="room-input" placeholder="Room ID" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-      <button id="btn-join" class="btn btn-secondary" style="white-space:nowrap;min-width:80px">JOIN</button>
+  <div id="demo-canvas-wrap"></div>
+  <div id="overlay-gradient"></div>
+  <div class="menu-content">
+    <div class="game-title" id="txt-title">BAT PVP</div>
+    <div class="game-tagline">chaya games · v2</div>
+    <div id="menu-main" class="menu-card">
+      <button id="nav-play" class="btn btn-primary">PLAY</button>
+      <button id="nav-ranking" class="btn btn-secondary">RANKING</button>
+      <button id="nav-settings" class="btn btn-mint">SETTINGS</button>
     </div>
-    <div id="room-id-display"></div>
-    <div id="status-msg" style="display:none"></div>
-    <div class="divider"></div>
-    <button id="btn-room-back" class="btn btn-back">BACK</button>
-  </div>
-  <div id="menu-settings" class="menu-card hidden">
-    <div class="card-title">SETTINGS</div>
-    <label id="txt-nick">NICKNAME</label>
-    <input type="text" id="nick-input" maxlength="13" placeholder="Your name">
-    <label id="txt-country">REGION</label>
-    <select id="country-select">
-      <option value="JP">JP - Japan</option><option value="US">US - United States</option>
-      <option value="GB">GB - United Kingdom</option><option value="KR">KR - South Korea</option>
-      <option value="CN">CN - China</option><option value="FR">FR - France</option>
-      <option value="DE">DE - Germany</option><option value="IT">IT - Italy</option>
-      <option value="ES">ES - Spain</option><option value="BR">BR - Brazil</option>
-      <option value="RU">RU - Russia</option><option value="IN">IN - India</option>
-      <option value="CA">CA - Canada</option><option value="AU">AU - Australia</option>
-    </select>
-    <label id="txt-lang">LANGUAGE</label>
-    <select id="lang-select">
-      <option value="ja">Japanese</option><option value="en">English</option>
-      <option value="ko">Korean</option><option value="zh">Chinese</option>
-      <option value="fr">French</option><option value="de">German</option><option value="es">Spanish</option>
-    </select>
-    <div class="skin-section-title">BODY COLOR</div>
-    <div class="skin-grid" id="skin-grid-body"></div>
-    <div class="divider"></div>
-    <label>USER ID</label>
-    <div class="uid-box" id="uid-display">--------</div>
-    <div class="uid-hint">YOUR UNIQUE PLAYER ID (READ ONLY)</div>
-    <div class="divider"></div>
-    <button class="btn btn-primary" id="btn-save" style="width:100%">SAVE</button>
-    <button class="btn btn-back nav-to-main" style="width:100%">BACK</button>
-  </div>
-  <div id="menu-ranking" class="menu-card hidden">
-    <div class="card-title">RANKING</div>
-    <div id="ranking-content" style="color:#95a5a6;text-align:center;padding:16px;font-weight:700">Loading...</div>
-    <div class="divider"></div>
-    <button class="btn btn-back nav-to-main">BACK</button>
+    <div id="menu-play" class="menu-card hidden">
+      <div class="card-title">SELECT MODE</div>
+      <button id="btn-cpu" class="btn btn-primary">1v1 vs CPU</button>
+      <button id="nav-match-select" class="btn btn-secondary">ONLINE</button>
+      <div class="divider"></div>
+      <button class="btn btn-back nav-to-main">BACK</button>
+    </div>
+    <div id="menu-match-select" class="menu-card hidden">
+      <div class="card-title">ONLINE</div>
+      <button id="btn-matchmaking" class="btn btn-primary">QUICK MATCH</button>
+      <button id="nav-room" class="btn btn-secondary">ROOM</button>
+      <div class="divider"></div>
+      <button id="btn-match-back" class="btn btn-back">BACK</button>
+    </div>
+    <div id="menu-room" class="menu-card hidden">
+      <div class="card-title">ROOM</div>
+      <button id="btn-create" class="btn btn-primary">CREATE ROOM</button>
+      <div id="join-controls" style="display:flex;gap:8px;">
+        <input type="text" id="room-input" placeholder="Room ID" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        <button id="btn-join" class="btn btn-secondary" style="white-space:nowrap;min-width:80px">JOIN</button>
+      </div>
+      <div id="room-id-display"></div>
+      <div id="status-msg" style="display:none"></div>
+      <div class="divider"></div>
+      <button id="btn-room-back" class="btn btn-back">BACK</button>
+    </div>
+    <div id="menu-settings" class="menu-card hidden">
+      <div class="card-title">SETTINGS</div>
+      <label id="txt-nick">NICKNAME</label>
+      <input type="text" id="nick-input" maxlength="13" placeholder="Your name">
+      <label id="txt-country">REGION</label>
+      <select id="country-select">
+        <option value="JP">JP - Japan</option><option value="US">US - United States</option>
+        <option value="GB">GB - United Kingdom</option><option value="KR">KR - South Korea</option>
+        <option value="CN">CN - China</option><option value="FR">FR - France</option>
+        <option value="DE">DE - Germany</option><option value="IT">IT - Italy</option>
+        <option value="ES">ES - Spain</option><option value="BR">BR - Brazil</option>
+        <option value="RU">RU - Russia</option><option value="IN">IN - India</option>
+        <option value="CA">CA - Canada</option><option value="AU">AU - Australia</option>
+      </select>
+      <label id="txt-lang">LANGUAGE</label>
+      <select id="lang-select">
+        <option value="ja">Japanese</option><option value="en">English</option>
+        <option value="ko">Korean</option><option value="zh">Chinese</option>
+        <option value="fr">French</option><option value="de">German</option><option value="es">Spanish</option>
+      </select>
+
+      <!-- SKIN GRID -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+        <div class="skin-section-title" style="margin:0">SKIN</div>
+        <div class="skin-count-label" id="skin-count-lbl">1 / 20</div>
+      </div>
+
+      <!-- Current skin preview -->
+      <div class="skin-preview-wrap">
+        <canvas id="skin-preview-canvas" width="40" height="80" style="width:40px;height:80px;"></canvas>
+        <div class="skin-preview-info">
+          <div class="skin-preview-name" id="skin-preview-name">Default</div>
+          <div class="skin-preview-hint">Select a skin below or get more at the skin site ↓</div>
+        </div>
+      </div>
+
+      <!-- 20-slot grid (5 columns × 4 rows) -->
+      <div class="skin-grid-20" id="skin-grid-20"></div>
+
+      <!-- Skin site banner -->
+      <a class="skin-site-banner" id="skin-site-link" href="#" target="_blank">
+        <div class="skin-site-icon">🦇</div>
+        <div class="skin-site-text">
+          <div class="skin-site-title">Bat PVP Skin Site</div>
+          <div class="skin-site-sub">GET OFFICIAL SKINS · batpvp-skins.netlify.app</div>
+        </div>
+        <div class="skin-site-arrow">›</div>
+      </a>
+
+      <input type="file" id="skin-upload-input" accept="image/png">
+
+      <div class="divider"></div>
+      <label>USER ID</label>
+      <div class="uid-box" id="uid-display">--------</div>
+      <div class="uid-hint">YOUR UNIQUE PLAYER ID (READ ONLY)</div>
+      <div class="divider"></div>
+      <button class="btn btn-primary" id="btn-save" style="width:100%">SAVE</button>
+      <button class="btn btn-back nav-to-main" style="width:100%">BACK</button>
+    </div>
+    <div id="menu-ranking" class="menu-card hidden">
+      <div class="card-title">RANKING</div>
+      <div id="ranking-content" style="color:#95a5a6;text-align:center;padding:16px;font-weight:700">Loading...</div>
+      <div class="divider"></div>
+      <button class="btn btn-back nav-to-main">BACK</button>
+    </div>
   </div>
 </div>
 
@@ -316,15 +310,15 @@ import{initializeApp}from'firebase/app';
 import{getDatabase,ref,set,onValue,update,onDisconnect,get,remove,runTransaction}from'firebase/database';
 
 // =====================
-// CONSTANTS
+// CONSTANTS & SECURITY
 // =====================
-const ADMIN_UID='AC5H328T';
-const ADMIN_NAME='Admini_Chaya';
 const BANNED=[/^admini/i,/管理者/];
+const MAX_SKINS=20;
+const SKIN_STORAGE_KEY='batpvp_skins_v2'; // array of {name,dataURL} or null for slot
+const SKIN_SEL_KEY='batpvp_skin_sel';     // selected slot index
+const RANKING_PATH='rankings_v2';
+const BAT_COLOR=0x8d6e63;
 
-// =====================
-// SECURITY
-// =====================
 function san(s){if(typeof s!=='string')return'';return s.replace(/[<>"'`\\\x00-\x1f\x7f]/g,'').trim().slice(0,30);}
 function safeKey(s){return s.replace(/[.#$\[\]\s\/]/g,'_').slice(0,40);}
 const _rl={};
@@ -338,7 +332,6 @@ function banned(name){return BANNED.some(p=>p.test(name));}
 function genUID(){const C='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';const a=new Uint8Array(8);crypto.getRandomValues(a);return Array.from(a,b=>C[b%C.length]).join('');}
 function getUID(){let u=localStorage.getItem('playerUID');if(!u||u.length!==8||!/^[A-Z0-9]{8}$/.test(u)){u=genUID();localStorage.setItem('playerUID',u);}return u;}
 const playerUID=getUID();
-const isAdmin=playerUID===ADMIN_UID;
 document.getElementById('uid-display').textContent=playerUID;
 
 // =====================
@@ -362,9 +355,8 @@ function playSound(type){
     else if(type==='win'){[523,659,784,1047].forEach((f,i)=>{const o=ctx.createOscillator(),gg=ctx.createGain();o.connect(gg);gg.connect(ctx.destination);o.type='triangle';o.frequency.value=f;const t=now+i*0.11;gg.gain.setValueAtTime(0,t);gg.gain.linearRampToValueAtTime(0.22,t+0.05);gg.gain.exponentialRampToValueAtTime(0.001,t+0.5);o.start(t);o.stop(t+0.5);});}
     else if(type==='lose'){[392,330,262,196].forEach((f,i)=>{const o=ctx.createOscillator(),gg=ctx.createGain();o.connect(gg);gg.connect(ctx.destination);o.type='sawtooth';o.frequency.value=f;const t=now+i*0.16;gg.gain.setValueAtTime(0.18,t);gg.gain.exponentialRampToValueAtTime(0.001,t+0.35);o.start(t);o.stop(t+0.5);});}
     else if(type==='stock'){const o=ctx.createOscillator();o.connect(g);o.type='sine';o.frequency.setValueAtTime(600,now);o.frequency.exponentialRampToValueAtTime(200,now+0.2);g.gain.setValueAtTime(0.2,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.22);o.start();o.stop(now+0.22);}
-    else if(type==='admini'){[600,800,1000].forEach((f,i)=>{const o=ctx.createOscillator(),gg=ctx.createGain();o.connect(gg);gg.connect(ctx.destination);o.type='sine';o.frequency.value=f;const t=now+i*0.05;gg.gain.setValueAtTime(0.07,t);gg.gain.exponentialRampToValueAtTime(0.001,t+0.12);o.start(t);o.stop(t+0.12);});}
-    else if(type==='rocket'){const o=ctx.createOscillator();o.connect(g);o.type='sawtooth';o.frequency.setValueAtTime(100,now);o.frequency.exponentialRampToValueAtTime(800,now+0.4);g.gain.setValueAtTime(0.3,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.5);o.start();o.stop(now+0.5);}
-    else if(type==='explosion'){const o=ctx.createOscillator(),d=ctx.createWaveShaper(),c=new Float32Array(256);for(let i=0;i<256;i++){const x=(i*2/256)-1;c[i]=x*0.8;}d.curve=c;o.connect(d);d.connect(g);o.type='sawtooth';o.frequency.setValueAtTime(180,now);o.frequency.exponentialRampToValueAtTime(20,now+0.5);g.gain.setValueAtTime(0.5,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.6);o.start();o.stop(now+0.6);}
+    else if(type==='cd'){const o=ctx.createOscillator();o.connect(g);o.type='sine';o.frequency.value=660;g.gain.setValueAtTime(0.18,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.12);o.start();o.stop(now+0.12);}
+    else if(type==='go'){[523,659,784].forEach((f,i)=>{const o=ctx.createOscillator(),gg=ctx.createGain();o.connect(gg);gg.connect(ctx.destination);o.type='square';o.frequency.value=f;const t=now+i*0.07;gg.gain.setValueAtTime(0.14,t);gg.gain.exponentialRampToValueAtTime(0.001,t+0.2);o.start(t);o.stop(t+0.22);});}
   }catch(e){}
 }
 let bgmNodes=null;
@@ -372,33 +364,235 @@ function startBGM(){try{const ctx=getACtx();if(bgmNodes)return;bgmNodes=[];const
 function stopBGM(){if(bgmNodes){bgmNodes.forEach(n=>clearInterval(n));bgmNodes=null;}}
 
 // =====================
-// SKINS
+// COUNTDOWN
 // =====================
-const BODY_COLORS=[
-  {hex:'#e74c3c',val:0xe74c3c},{hex:'#e67e22',val:0xe67e22},{hex:'#f1c40f',val:0xf1c40f},
-  {hex:'#2ecc71',val:0x2ecc71},{hex:'#1abc9c',val:0x1abc9c},{hex:'#3498db',val:0x3498db},
-  {hex:'#9b59b6',val:0x9b59b6},{hex:'#e91e63',val:0xe91e63},{hex:'#607d8b',val:0x607d8b},
-  {hex:'#795548',val:0x795548},{hex:'#ff5722',val:0xff5722},{hex:'#00bcd4',val:0x00bcd4},
-  {hex:'#8bc34a',val:0x8bc34a},{hex:'#ffc107',val:0xffc107},{hex:'#2196f3',val:0x2196f3}
-];
-const BAT_COLOR=0x8d6e63;
-let selectedBodyIdx=parseInt(localStorage.getItem('skinBody')||'5');
-
-function renderSkinGrid(gridId,colors,selIdx,onSel){
-  const grid=document.getElementById(gridId);grid.innerHTML='';
-  colors.forEach((c,i)=>{
-    const div=document.createElement('div');
-    div.className='skin-swatch'+(i===selIdx?' selected':'');
-    div.style.background=c.hex;div.innerHTML='<span class="swatch-check">+</span>';
-    div.onclick=()=>{selectedBodyIdx=i;renderSkinGrid(gridId,colors,i,onSel);onSel(i);};
-    grid.appendChild(div);
+async function runCountdown(){
+  return new Promise(resolve=>{
+    const wrap=document.getElementById('countdown-wrap');
+    const num=document.getElementById('countdown-num');
+    wrap.classList.add('active');
+    let count=3;
+    function tick(){
+      num.className='';void num.offsetWidth;
+      if(count>0){
+        num.textContent=count;num.className='';
+        playSound('cd');
+        count--;setTimeout(tick,900);
+      } else {
+        num.textContent='START!';num.className='go';void num.offsetWidth;
+        playSound('go');
+        setTimeout(()=>{wrap.classList.remove('active');resolve();},600);
+      }
+    }
+    tick();
   });
+}
+
+// =====================
+// SKIN SYSTEM
+// =====================
+// skins = array of 20 entries: null = empty, {name,dataURL,img} = filled
+let skins=new Array(MAX_SKINS).fill(null);
+// slot 0 = default (always white, can't delete)
+skins[0]={name:'Default',dataURL:null,img:null};
+let selectedSkinIdx=0;
+
+function saveSkinStorage(){
+  const toSave=skins.map((s,i)=>{
+    if(i===0) return {name:'Default',dataURL:null};
+    if(!s) return null;
+    return {name:s.name,dataURL:s.dataURL};
+  });
+  try{localStorage.setItem(SKIN_STORAGE_KEY,JSON.stringify(toSave));}catch(e){
+    // If storage full, trim oldest non-default skins
+    alert('Storage full. Some skins may not be saved.');
+  }
+  localStorage.setItem(SKIN_SEL_KEY,String(selectedSkinIdx));
+}
+
+async function loadSkinStorage(){
+  try{
+    const raw=localStorage.getItem(SKIN_STORAGE_KEY);
+    if(!raw) return;
+    const arr=JSON.parse(raw);
+    for(let i=0;i<Math.min(arr.length,MAX_SKINS);i++){
+      if(i===0){skins[0]={name:'Default',dataURL:null,img:null};continue;}
+      if(!arr[i]){skins[i]=null;continue;}
+      const entry=arr[i];
+      if(entry.dataURL){
+        const img=await loadImg(entry.dataURL);
+        skins[i]={name:entry.name||'Skin '+(i+1),dataURL:entry.dataURL,img};
+      }
+    }
+    const sel=parseInt(localStorage.getItem(SKIN_SEL_KEY)||'0');
+    selectedSkinIdx=skins[sel]?sel:0;
+  }catch(e){}
+}
+
+function loadImg(src){return new Promise(r=>{const img=new Image();img.onload=()=>r(img);img.onerror=()=>r(null);img.src=src;});}
+
+// =====================
+// SKIN DRAWING
+// =====================
+function drawSkinToCanvas(img,canvas,size){
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  if(!img){
+    // White default MC-style figure
+    const u=w/8; // unit
+    ctx.fillStyle='#e8e8e8';ctx.strokeStyle='#ccc';ctx.lineWidth=0.5;
+    // Head
+    ctx.fillRect(2*u,0.2*u,4*u,4*u);ctx.strokeRect(2*u,0.2*u,4*u,4*u);
+    // Body
+    ctx.fillRect(2.2*u,4.4*u,3.6*u,3.2*u);ctx.strokeRect(2.2*u,4.4*u,3.6*u,3.2*u);
+    // Arms
+    ctx.fillRect(0.6*u,4.4*u,1.4*u,2.8*u);ctx.strokeRect(0.6*u,4.4*u,1.4*u,2.8*u);
+    ctx.fillRect(6*u,4.4*u,1.4*u,2.8*u);ctx.strokeRect(6*u,4.4*u,1.4*u,2.8*u);
+    // Legs
+    ctx.fillRect(2.2*u,7.7*u,1.6*u,3*u);ctx.strokeRect(2.2*u,7.7*u,1.6*u,3*u);
+    ctx.fillRect(4.2*u,7.7*u,1.6*u,3*u);ctx.strokeRect(4.2*u,7.7*u,1.6*u,3*u);
+    return;
+  }
+  // Render from MC skin sheet
+  const sw=img.width,sh=img.height;
+  const tmp=document.createElement('canvas');tmp.width=sw;tmp.height=sh;
+  const tc=tmp.getContext('2d');tc.drawImage(img,0,0);
+  ctx.imageSmoothingEnabled=false;
+  const s=sw/64;
+  const u=w/8;
+  function dr(sx,sy,sw2,sh2,dx,dy,dw,dh){ctx.drawImage(tmp,sx*s,sy*s,sw2*s,sh2*s,dx,dy,dw,dh);}
+  dr(8,8,8,8, 2*u,0.2*u, 4*u,4*u);       // head
+  dr(20,20,8,12, 2.2*u,4.4*u, 3.6*u,3.2*u); // body
+  dr(44,20,4,12, 0.6*u,4.4*u, 1.4*u,2.8*u); // right arm
+  try{dr(36,52,4,12, 6*u,4.4*u, 1.4*u,2.8*u);}catch(e){dr(44,20,4,12, 6*u,4.4*u, 1.4*u,2.8*u);} // left arm
+  dr(4,20,4,12, 2.2*u,7.7*u, 1.6*u,3*u);    // right leg
+  try{dr(20,52,4,12, 4.2*u,7.7*u, 1.6*u,3*u);}catch(e){dr(4,20,4,12, 4.2*u,7.7*u, 1.6*u,3*u);} // left leg
+}
+
+function updateSkinPreview(){
+  const cv=document.getElementById('skin-preview-canvas');if(!cv)return;
+  const s=skins[selectedSkinIdx];
+  drawSkinToCanvas(s?.img||null,cv);
+  document.getElementById('skin-preview-name').textContent=s?.name||'Default';
+}
+
+function renderSkinGrid20(){
+  const grid=document.getElementById('skin-grid-20');if(!grid)return;
+  grid.innerHTML='';
+  const filled=skins.filter(Boolean).length;
+  document.getElementById('skin-count-lbl').textContent=`${filled} / ${MAX_SKINS}`;
+
+  for(let i=0;i<MAX_SKINS;i++){
+    const s=skins[i];
+    const slot=document.createElement('div');
+
+    if(s){
+      // Filled slot
+      slot.className='skin-slot'+(i===selectedSkinIdx?' selected':'')+(i===0?' skin-slot-default':'');
+      const cv=document.createElement('canvas');cv.width=40;cv.height=80;
+      drawSkinToCanvas(s.img||null,cv);slot.appendChild(cv);
+      slot.onclick=()=>{selectedSkinIdx=i;renderSkinGrid20();updateSkinPreview();};
+      // Delete button (not for slot 0)
+      if(i>0){
+        const del=document.createElement('div');del.className='slot-del';del.textContent='×';
+        del.onclick=(e)=>{e.stopPropagation();deleteSkin(i);};slot.appendChild(del);
+      }
+    } else {
+      // Empty slot — show + button
+      slot.className='skin-slot skin-slot-add';
+      slot.textContent='+';
+      slot.title='Add skin';
+      slot.onclick=()=>triggerSkinUpload(i);
+    }
+    grid.appendChild(slot);
+  }
+}
+
+let uploadTargetSlot=0;
+function triggerSkinUpload(slotIdx){
+  uploadTargetSlot=slotIdx;
+  document.getElementById('skin-upload-input').click();
+}
+document.getElementById('skin-upload-input').onchange=async e=>{
+  const file=e.target.files[0];if(!file)return;
+  if(!file.type.includes('png')){alert('PNG only!');e.target.value='';return;}
+  // Size check
+  if(file.size>512*1024){alert('File too large! Max 512KB.');e.target.value='';return;}
+  const dataURL=await new Promise(r=>{const fr=new FileReader();fr.onload=ev=>r(ev.target.result);fr.readAsDataURL(file);});
+  const img=await loadImg(dataURL);
+  if(!img){alert('Failed to load image.');e.target.value='';return;}
+  // Validate: must be exactly 64×64 (strict Bat PVP skin format)
+  if(!validateBatPVPSkin(img)){
+    alert('Invalid skin!\n\nBat PVP skins must be:\n• 64×64 PNG\n• Downloaded from the official Bat PVP Skin Site\n\nGet official skins at batpvp-skins.netlify.app');
+    e.target.value='';return;
+  }
+  const name=file.name.replace(/\.png$/i,'').slice(0,16)||'Skin '+(uploadTargetSlot+1);
+  skins[uploadTargetSlot]={name,dataURL,img};
+  selectedSkinIdx=uploadTargetSlot;
+  saveSkinStorage();
+  renderSkinGrid20();updateSkinPreview();
+  e.target.value='';
+};
+
+function deleteSkin(idx){
+  if(idx===0)return;
+  if(!confirm('Delete this skin?'))return;
+  skins[idx]=null;
+  if(selectedSkinIdx===idx)selectedSkinIdx=0;
+  saveSkinStorage();
+  renderSkinGrid20();updateSkinPreview();
+}
+
+// =====================
+// SKIN VALIDATION
+// For official Bat PVP skins: 64×64, specific pixel signature
+// =====================
+function validateBatPVPSkin(img){
+  // Must be exactly 64×64
+  if(img.width!==64||img.height!==64) return false;
+  // Read pixel data for further checks
+  const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+  const ctx=cv.getContext('2d');ctx.drawImage(img,0,0);
+  let d;
+  try{d=ctx.getImageData(0,0,64,64).data;}catch(e){return false;}
+  // Check: top-left corner pixel (0,0) must be fully transparent (standard MC skin layout)
+  if(d[3]!==0) return false;
+  // Check: pixel at (63,63) — official skins embed a signature: R=66(B), G=80(P), B=86(V)  (BPV = Bat PVP Version marker)
+  const ox=(63*64+63)*4;
+  if(d[ox]!==66||d[ox+1]!==80||d[ox+2]!==86) return false;
+  // Check: pixel at (0,32) — second signature: R=118, G=50, B=200 (unique magic color)
+  const ox2=(32*64+0)*4;
+  if(d[ox2]!==118||d[ox2+1]!==50||d[ox2+2]!==200) return false;
+  // Check: at least 20% of face region (8-16, 8-16) is non-transparent
+  let faceOpaque=0;
+  for(let fy=8;fy<16;fy++)for(let fx=8;fx<16;fx++){const i2=(fy*64+fx)*4;if(d[i2+3]>128)faceOpaque++;}
+  if(faceOpaque<12) return false; // at least 12/64 face pixels must be drawn
+  return true;
+}
+
+// Get 3D body color from selected skin
+function getSkinBodyColor3D(){
+  const s=skins[selectedSkinIdx];
+  if(!s||!s.img) return 0xffffff;
+  const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+  const ctx=cv.getContext('2d');ctx.drawImage(s.img,0,0);
+  try{const d=ctx.getImageData(20,20,1,1).data;return(d[0]<<16)|(d[1]<<8)|d[2];}
+  catch(e){return 0xffffff;}
+}
+
+function buildSkinTex3D(){
+  const s=skins[selectedSkinIdx];
+  if(!s||!s.img) return null;
+  const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+  const ctx=cv.getContext('2d');ctx.drawImage(s.img,0,0);
+  return new THREE.CanvasTexture(cv);
 }
 
 // =====================
 // STAGE
 // =====================
-const STAGE={bg:0x87ceeb,arena:0x95a5a6,edge:0xbdc3c7,fog:0x87ceeb};
+const STAGE={bg:0x87ceeb,arena:0x95a5a6,edge:0xbdc3c7};
 
 // =====================
 // SETTINGS
@@ -406,7 +600,6 @@ const STAGE={bg:0x87ceeb,arena:0x95a5a6,edge:0xbdc3c7,fog:0x87ceeb};
 const getInitNick=()=>{let c=parseInt(localStorage.getItem('userCount')||'0')+1;localStorage.setItem('userCount',c);return 'Player'+c.toString().padStart(4,'0');};
 const loadSettings=()=>{
   const s=JSON.parse(localStorage.getItem('hexSmashSettings')||`{"nick":"${getInitNick()}","lang":"en","country":"JP"}`);
-  if(isAdmin)s.nick=ADMIN_NAME;
   document.getElementById('nick-input').value=s.nick||'';
   document.getElementById('lang-select').value=s.lang||'en';
   document.getElementById('country-select').value=s.country||'JP';
@@ -414,330 +607,22 @@ const loadSettings=()=>{
 };
 const saveSettings=()=>{
   let raw=document.getElementById('nick-input').value.trim();
-  if(isAdmin){raw=ADMIN_NAME;}
-  else if(banned(raw)){alert('この名前は使用できません。');return;}
+  if(banned(raw)){alert('この名前は使用できません。');return;}
   const nick=san(raw)||'Player';
   const langV=document.getElementById('lang-select').value;
   const cntV=document.getElementById('country-select').value;
   localStorage.setItem('hexSmashSettings',JSON.stringify({nick,lang:langV,country:cntV}));
-  localStorage.setItem('skinBody',String(selectedBodyIdx));
   nickname=nick;lang=langV;country=cntV;
   applyL();
 };
 
 let settings=loadSettings();
-let nickname=isAdmin?ADMIN_NAME:(banned(settings.nick||'')?'Player':(settings.nick||'Player'));
+let nickname=banned(settings.nick||'')?'Player':(settings.nick||'Player');
 let lang=settings.lang||'en';
 let country=settings.country||'JP';
 const maxStocks=3;
 let gameState='MENU',isOnline=false,myRole='p1',roomId=null;
 const agents=[];
-
-// =====================
-// ADMINI — COOLDOWN SYSTEM
-// =====================
-// durations in seconds; cd=cooldown, dur=effect duration (0=instant/oneshot)
-const CMD_CONFIG={
-  rocket:   {dur:2.5, cd:120},
-  ragdoll:  {dur:10,  cd:30 },
-  balloon:  {dur:15,  cd:30 },
-  inverse:  {dur:15,  cd:30 },
-  nightvision:{dur:5, cd:15 },
-  jail:     {dur:10,  cd:60 },
-  control:  {dur:5,   cd:15 },
-  tiny:     {dur:10,  cd:60 },
-  jumpscare:{dur:0,   cd:10 },
-  morph:    {dur:15,  cd:30 }
-};
-// Per-target cooldown state: {self:{cmd:{cdEnd,activeEnd}}, opp:{...}}
-const admCDs={self:{},opp:{}};
-// Active effects on each fighter (indexed by fighter ref later)
-// We store effect timers here, applied per frame
-const admEffects={self:{},opp:{}};
-// Currently selected target in panel
-let admTarget='opp'; // 'self' or 'opp'
-let admOpen=false;
-let admCtrlAngle=0;
-
-// Rocket per-target phase state
-const rocketState={self:{phase:'idle',timer:0},opp:{phase:'idle',timer:0}};
-
-function admGetTarget(tKey){
-  // tKey = 'self' or 'opp'; returns the fighter object
-  if(!isOnline){
-    return tKey==='self'?p1:p2;
-  } else {
-    return tKey==='self'?(myRole==='p1'?p1:p2):(myRole==='p1'?p2:p1);
-  }
-}
-function admGetTargetRole(tKey){
-  if(!isOnline) return tKey==='self'?'p1':'p2';
-  if(tKey==='self') return myRole;
-  return myRole==='p1'?'p2':'p1';
-}
-
-function admCanUse(tKey,cmd){
-  if(!admCDs[tKey][cmd]) return true;
-  return Date.now()>=admCDs[tKey][cmd].cdEnd;
-}
-function admIsActive(tKey,cmd){
-  if(!admCDs[tKey][cmd]) return false;
-  if(CMD_CONFIG[cmd].dur===0) return false;
-  return Date.now()<admCDs[tKey][cmd].activeEnd;
-}
-function admActivate(tKey,cmd){
-  const cfg=CMD_CONFIG[cmd];
-  const now=Date.now();
-  admCDs[tKey][cmd]={
-    cdEnd: now+(cfg.dur+cfg.cd)*1000,
-    activeEnd: now+cfg.dur*1000
-  };
-}
-
-function admUseCmd(cmd){
-  if(!admCanUse(admTarget,cmd)) return; // on cooldown
-  playSound('admini');
-  admActivate(admTarget,cmd);
-  const fighter=admGetTarget(admTarget);
-  const tKey=admTarget;
-  // Apply effect immediately
-  admApplyEffect(cmd,tKey,fighter);
-  // Online: send to opponent if target is opponent
-  if(isOnline&&admTarget==='opp') admSendOnline(cmd);
-  admRefreshPanel();
-}
-
-function admApplyEffect(cmd,tKey,fighter){
-  if(!fighter) return;
-  if(cmd==='tiny'){
-    const sc=0.4; fighter.mesh.scale.set(sc,sc,sc);
-    fighter.isTiny=true;
-    // auto-restore after duration
-    setTimeout(()=>{
-      if(fighter.mesh) fighter.mesh.scale.set(1,1,1);
-      fighter.isTiny=false;
-    }, CMD_CONFIG.tiny.dur*1000);
-  }
-  if(cmd==='jail'){
-    fighter.jailMode=true;
-    setTimeout(()=>{fighter.jailMode=false;}, CMD_CONFIG.jail.dur*1000);
-  }
-  if(cmd==='balloon'){
-    fighter.balloonMode=true;
-    setTimeout(()=>{fighter.balloonMode=false;}, CMD_CONFIG.balloon.dur*1000);
-  }
-  if(cmd==='ragdoll'){
-    fighter.ragdollMode=true;
-    setTimeout(()=>{fighter.ragdollMode=false;fighter.mesh.rotation.x=0;fighter.mesh.rotation.z=0;}, CMD_CONFIG.ragdoll.dur*1000);
-  }
-  if(cmd==='inverse'){
-    fighter.inverseControls=true;
-    setTimeout(()=>{fighter.inverseControls=false;}, CMD_CONFIG.inverse.dur*1000);
-  }
-  if(cmd==='morph'){
-    fighter.morphMode=true;
-    setTimeout(()=>{
-      fighter.morphMode=false;
-      if(fighter.mesh&&fighter.mesh.children[0])
-        fighter.mesh.children[0].material.color.setHex(fighter.bodyColor||0x3498db);
-    }, CMD_CONFIG.morph.dur*1000);
-  }
-  if(cmd==='control'){
-    fighter.controlMode=true;
-    setTimeout(()=>{fighter.controlMode=false;}, CMD_CONFIG.control.dur*1000);
-  }
-  if(cmd==='nightvision'){
-    // Only applies visually to the victim's screen — sent via Firebase for online
-    // For local: if self or CPU mode, apply to local screen
-    if(!isOnline || tKey==='self'){
-      const nv=document.getElementById('nv-overlay');
-      const nvv=document.getElementById('nv-vignette');
-      nv.style.display='block'; nvv.style.display='block';
-      setTimeout(()=>{nv.style.display='none';nvv.style.display='none';}, CMD_CONFIG.nightvision.dur*1000);
-    }
-  }
-  if(cmd==='jumpscare'){
-    if(!isOnline || tKey==='self') showJumpscare();
-  }
-  if(cmd==='rocket'){
-    rocketState[tKey].phase='rising';
-    rocketState[tKey].timer=0;
-    playSound('rocket');
-  }
-}
-
-function showJumpscare(){
-  const el=document.getElementById('js-overlay');
-  const tx=document.getElementById('js-text');
-  tx.style.animation='none'; void tx.offsetWidth; tx.style.animation='';
-  el.style.display='flex';
-  setTimeout(()=>{ el.style.display='none'; }, 2000);
-}
-
-function admSendOnline(cmd){
-  if(!isOnline||!roomId) return;
-  const oppRole=myRole==='p1'?'p2':'p1';
-  if(rateLimit('adm_send',10))
-    update(ref(db,`rooms/${roomId}/${oppRole}/admini`),{cmd,t:Date.now()});
-}
-
-function admRefreshPanel(){
-  if(!admOpen) return;
-  // Update player cards
-  const selfFighter=admGetTarget('self');
-  const oppFighter=admGetTarget('opp');
-  // Self card
-  if(selfFighter){
-    const av=document.getElementById('ap-self-avatar');
-    av.style.background='#'+(selfFighter.bodyColor||0x3498db).toString(16).padStart(6,'0');
-    document.getElementById('ap-self-name').textContent='@'+san(selfFighter.name||'---').slice(0,10);
-    document.getElementById('ap-self-stocks').textContent='[heart]'.replace('[heart]','').padStart(0)+Array(selfFighter.stocks+1).join('*');
-    // build stocks text
-    document.getElementById('ap-self-stocks').textContent=selfFighter.stocks>0?'*'.repeat(selfFighter.stocks):'---';
-    // active fx
-    const selfFx=Object.keys(CMD_CONFIG).filter(c=>admIsActive('self',c)).map(c=>':'+c).join(' ');
-    document.getElementById('ap-self-fx').textContent=selfFx;
-  }
-  if(oppFighter){
-    const av=document.getElementById('ap-opp-avatar');
-    av.style.background='#'+(oppFighter.bodyColor||0x3498db).toString(16).padStart(6,'0');
-    document.getElementById('ap-opp-name').textContent='@'+san(oppFighter.name||'---').slice(0,10);
-    document.getElementById('ap-opp-stocks').textContent=oppFighter.stocks>0?'*'.repeat(oppFighter.stocks):'---';
-    const oppFx=Object.keys(CMD_CONFIG).filter(c=>admIsActive('opp',c)).map(c=>':'+c).join(' ');
-    document.getElementById('ap-opp-fx').textContent=oppFx;
-  }
-  // Update cooldown bars & labels
-  const now=Date.now();
-  Object.keys(CMD_CONFIG).forEach(cmd=>{
-    const btn=document.querySelector(`.admini-btn[data-cmd="${cmd}"]`);
-    const cdEl=document.getElementById(`cd-${cmd}`);
-    const barEl=document.getElementById(`bar-${cmd}`);
-    if(!btn||!cdEl||!barEl) return;
-    const tcd=admCDs[admTarget][cmd];
-    const cfg=CMD_CONFIG[cmd];
-    const totalCdMs=(cfg.dur+cfg.cd)*1000;
-    if(!tcd||now>=tcd.cdEnd){
-      // ready
-      btn.classList.remove('active','cooling');
-      cdEl.textContent='';
-      barEl.style.width='0';
-    } else if(now<tcd.activeEnd&&cfg.dur>0){
-      // active
-      btn.classList.add('active');btn.classList.remove('cooling');
-      const rem=Math.ceil((tcd.activeEnd-now)/1000);
-      cdEl.textContent=rem+'s';
-      const pct=((tcd.activeEnd-now)/(cfg.dur*1000))*100;
-      barEl.style.width=pct+'%';
-      barEl.style.background='#27ae60';
-    } else {
-      // cooling down
-      btn.classList.remove('active');btn.classList.add('cooling');
-      const rem=Math.ceil((tcd.cdEnd-now)/1000);
-      cdEl.textContent=rem+'s';
-      const elapsed=now-(tcd.activeEnd||tcd.cdEnd-cfg.cd*1000);
-      const pct=Math.max(0,((tcd.cdEnd-now)/(cfg.cd*1000))*100);
-      barEl.style.width=pct+'%';
-      barEl.style.background='#c0392b';
-    }
-  });
-}
-
-function openAdmini(){if(!isAdmin)return;admOpen=true;document.getElementById('admini-panel').classList.add('open');admRefreshPanel();}
-function closeAdmini(){admOpen=false;document.getElementById('admini-panel').classList.remove('open');}
-document.getElementById('admini-close').onclick=closeAdmini;
-
-// Target tabs
-document.getElementById('ap-self').onclick=()=>{
-  admTarget='self';
-  document.getElementById('ap-self').classList.add('selected');
-  document.getElementById('ap-opp').classList.remove('selected');
-  admRefreshPanel();
-};
-document.getElementById('ap-opp').onclick=()=>{
-  admTarget='opp';
-  document.getElementById('ap-opp').classList.add('selected');
-  document.getElementById('ap-self').classList.remove('selected');
-  admRefreshPanel();
-};
-
-document.querySelectorAll('.admini-btn').forEach(b=>b.onclick=()=>{
-  const cmd=b.dataset.cmd;
-  if(!admCanUse(admTarget,cmd)) return;
-  admUseCmd(cmd);
-});
-
-document.getElementById('admini-cmd-input').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    const v=e.target.value.trim().replace(/^;/,'');
-    if(CMD_CONFIG.hasOwnProperty(v)) admUseCmd(v);
-    e.target.value='';
-  }
-});
-
-// Panel refresh interval while open
-setInterval(()=>{if(admOpen)admRefreshPanel();},200);
-
-// =====================
-// PER-FRAME admini effects
-// =====================
-function adminiPerFrame(){
-  ['self','opp'].forEach(tKey=>{
-    const f=admGetTarget(tKey);
-    if(!f||!f.alive) return;
-    // balloon: reduce gravity, slight horizontal damping, NO extra upward
-    if(f.balloonMode){
-      // Override gravity partially — handled in fighter update
-    }
-    // ragdoll: spin but clamp y to not go underground
-    if(f.ragdollMode){
-      f.mesh.rotation.x+=0.1;f.mesh.rotation.z+=0.08;
-      if(Math.random()<0.04){
-        f.velocity.x+=(Math.random()-.5)*0.25;
-        f.velocity.z+=(Math.random()-.5)*0.25;
-        f.velocity.y+=Math.random()*0.12;
-      }
-    }else{f.mesh.rotation.x*=0.82;f.mesh.rotation.z*=0.82;}
-    // morph: rainbow color + chaotic movement
-    if(f.morphMode&&f.mesh&&f.mesh.children[0]){
-      f.mesh.children[0].material.color.setHSL((Date.now()/15%360)/360,1,0.5);
-      f.mesh.rotation.y+=0.07;
-      if(Math.random()<0.08){
-        f.velocity.x+=(Math.random()-.5)*0.1;
-        f.velocity.z+=(Math.random()-.5)*0.1;
-      }
-    }
-    // control: chaotic forced movement (still partial input allowed in fighter.update)
-    if(f.controlMode){
-      admCtrlAngle+=0.06;
-      f.velocity.x+=Math.cos(admCtrlAngle)*0.06;
-      f.velocity.z+=Math.sin(admCtrlAngle)*0.06;
-      f.velocity.x+=Math.sin(admCtrlAngle*2.3)*0.03;
-    }
-    // rocket phases
-    const rs=rocketState[tKey];
-    if(rs.phase==='rising'){
-      rs.timer+=1/60;
-      f.velocity.y=Math.min(f.velocity.y+0.035, 0.22); // gentle upward, capped so stays visible
-      if(rs.timer>=2.5){rs.phase='pause';rs.timer=0;}
-    } else if(rs.phase==='pause'){
-      rs.timer+=1/60;
-      f.velocity.y*=0.85; // slow down
-      if(rs.timer>=0.5){
-        rs.phase='explode';
-        playSound('explosion');
-        spawnParticles(f.mesh.position,0xff6600,30);
-        spawnRing(f.mesh.position);
-        // blast away from arena center
-        const dir=new THREE.Vector3(f.mesh.position.x,0,f.mesh.position.z).normalize();
-        if(dir.length()<0.1) dir.set(Math.random()-.5,0,Math.random()-.5).normalize();
-        f.velocity.x=dir.x*0.7+((Math.random()-.5)*0.3);
-        f.velocity.z=dir.z*0.7+((Math.random()-.5)*0.3);
-        f.velocity.y=0.3;
-        rs.phase='idle';
-      }
-    }
-  });
-}
 
 // =====================
 // i18n
@@ -753,7 +638,7 @@ const i18n={
 };
 
 // =====================
-// THREE.JS
+// THREE.JS — MAIN SCENE
 // =====================
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(58,window.innerWidth/window.innerHeight,0.1,1000);
@@ -762,6 +647,8 @@ renderer.setSize(window.innerWidth,window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 renderer.shadowMap.enabled=false;
 document.body.appendChild(renderer.domElement);
+renderer.domElement.style.width='100%';renderer.domElement.style.height='100%';
+renderer.domElement.style.position='absolute';renderer.domElement.style.top='0';renderer.domElement.style.left='0';
 
 scene.background=new THREE.Color(STAGE.bg);
 scene.fog=new THREE.Fog(STAGE.bg,22,75);
@@ -779,17 +666,89 @@ const floorM=new THREE.Mesh(new THREE.CylinderGeometry(arenaRadius-0.1,arenaRadi
 floorM.position.y=0.02;scene.add(floorM);
 
 // =====================
+// DEMO SCENE (menu bg)
+// =====================
+const demoScene=new THREE.Scene();
+const demoCamera=new THREE.PerspectiveCamera(58,window.innerWidth/window.innerHeight,0.1,1000);
+const demoRenderer=new THREE.WebGLRenderer({antialias:false,alpha:false});
+demoRenderer.setSize(window.innerWidth,window.innerHeight);
+demoRenderer.setPixelRatio(1);
+demoRenderer.setClearColor(0x87ceeb,1);
+document.getElementById('demo-canvas-wrap').appendChild(demoRenderer.domElement);
+
+demoScene.background=new THREE.Color(STAGE.bg);
+demoScene.fog=new THREE.Fog(STAGE.bg,22,75);
+demoScene.add(new THREE.DirectionalLight(0xffffff,2));
+demoScene.add(new THREE.AmbientLight(0xffffff,0.8));
+const demoArena=new THREE.Mesh(new THREE.CylinderGeometry(arenaRadius,arenaRadius+1.2,2,6),new THREE.MeshStandardMaterial({color:STAGE.arena}));
+demoArena.position.y=-1;demoScene.add(demoArena);
+const demoEdge=new THREE.Mesh(new THREE.CylinderGeometry(arenaRadius+0.06,arenaRadius+0.06,0.06,6),new THREE.MeshStandardMaterial({color:STAGE.edge}));
+demoEdge.position.y=0.06;demoScene.add(demoEdge);
+const demoFloor=new THREE.Mesh(new THREE.CylinderGeometry(arenaRadius-0.1,arenaRadius-0.1,0.05,6),new THREE.MeshStandardMaterial({color:STAGE.edge}));
+demoFloor.position.y=0.02;demoScene.add(demoFloor);
+
+// Demo fighters
+function makeDemoFighter(color,x){
+  const g=new THREE.Group();
+  const head=new THREE.Mesh(new THREE.BoxGeometry(0.85,0.85,0.85),new THREE.MeshStandardMaterial({color}));head.position.y=2.05;g.add(head);
+  const body=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.95,0.38),new THREE.MeshStandardMaterial({color}));body.position.y=1.2;g.add(body);
+  const aL=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.85,0.28),new THREE.MeshStandardMaterial({color}));aL.position.set(-0.52,1.2,0);g.add(aL);
+  const aR=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.85,0.28),new THREE.MeshStandardMaterial({color}));aR.position.set(0.52,1.2,0);g.add(aR);
+  const lL=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.85,0.28),new THREE.MeshStandardMaterial({color}));lL.position.set(-0.2,0.42,0);g.add(lL);
+  const lR=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.85,0.28),new THREE.MeshStandardMaterial({color}));lR.position.set(0.2,0.42,0);g.add(lR);
+  // Bat
+  const batPiv=new THREE.Group();batPiv.position.set(0.6,1.3,0);
+  const bat=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.06,1.5,8),new THREE.MeshStandardMaterial({color:BAT_COLOR}));bat.rotation.x=Math.PI/2;bat.position.z=0.45;batPiv.add(bat);g.add(batPiv);
+  g.position.set(x,0,0);demoScene.add(g);
+  return{mesh:g,parts:{head,body,aL,aR,lL,lR,batPiv},vx:0,vy:0,vz:0,onGround:true,atk:0,walkCycle:0,phase:'approach',phTimer:80,circDir:1};
+}
+const demoP1=makeDemoFighter(0xffffff,-4);
+const demoP2=makeDemoFighter(0xe74c3c,4);
+let demoCamAngle=0;
+
+function updateDemoFighter(self,target){
+  const toT=new THREE.Vector3().subVectors(target.mesh.position,self.mesh.position);
+  const dist=toT.length();
+  const to2=new THREE.Vector3(toT.x,0,toT.z);
+  self.vy-=0.015;
+  if(self.mesh.position.y<0&&Math.sqrt(self.mesh.position.x**2+self.mesh.position.z**2)<arenaRadius){
+    self.mesh.position.y=0;self.vy=0;self.onGround=true;
+  }
+  self.mesh.position.x+=self.vx;self.mesh.position.y+=self.vy;self.mesh.position.z+=self.vz;
+  self.vx*=0.88;self.vz*=0.88;
+  self.phTimer--;
+  if(self.phTimer<=0){self.phase=Math.random()<0.6?'approach':'circle';self.phTimer=60+Math.random()*60;self.circDir*=-1;}
+  const n=to2.length()||1;
+  if(dist>2.5){self.vx+=to2.x/n*0.055;self.vz+=to2.z/n*0.055;}
+  if(self.phase==='circle'){const p=new THREE.Vector3(-to2.z,0,to2.x).normalize();self.vx+=p.x*0.04*self.circDir;self.vz+=p.z*0.04*self.circDir;}
+  if(dist<2.8&&self.atk<=0){self.parts.batPiv.rotation.y+=0.5;self.atk=40;}
+  if(self.atk>0){self.atk--;self.parts.batPiv.rotation.y=Math.sin((40-self.atk)/40*Math.PI)*1.8;}
+  else{self.parts.batPiv.rotation.y*=0.8;}
+  if(to2.length()>0.05)self.mesh.rotation.y=Math.atan2(to2.x,to2.z);
+  const d2=Math.sqrt(self.mesh.position.x**2+self.mesh.position.z**2);
+  if(d2>arenaRadius*0.8){const sv=new THREE.Vector3(self.mesh.position.x,0,self.mesh.position.z).normalize();self.vx-=sv.x*0.07;self.vz-=sv.z*0.07;}
+  // Walk anim
+  const moving=Math.abs(self.vx)+Math.abs(self.vz)>0.01;
+  if(moving){
+    self.walkCycle+=0.18;
+    const sw=Math.sin(self.walkCycle)*0.5;
+    self.parts.aL.rotation.x=sw;self.parts.aR.rotation.x=-sw;
+    self.parts.lL.rotation.x=-sw;self.parts.lR.rotation.x=sw;
+  }
+}
+
+// =====================
 // PARTICLES
 // =====================
 const ptSys=[];
-function spawnParticles(pos,color=0xffdd57,count=16){
+function spawnParticles(pos,color=0xffdd57,count=14){
   const geo=new THREE.BufferGeometry(),arr=new Float32Array(count*3);
   for(let i=0;i<count*3;i+=3){arr[i]=pos.x;arr[i+1]=pos.y+1;arr[i+2]=pos.z;}
   geo.setAttribute('position',new THREE.BufferAttribute(arr,3));
   const mat=new THREE.PointsMaterial({color,size:0.2,sizeAttenuation:true,transparent:true});
   const pts=new THREE.Points(geo,mat);scene.add(pts);
-  const vels=Array.from({length:count},()=>new THREE.Vector3((Math.random()-.5)*.3,Math.random()*.22+.08,(Math.random()-.5)*.3));
-  ptSys.push({pts,vels,life:36,maxLife:36});
+  const vels=Array.from({length:count},()=>new THREE.Vector3((Math.random()-.5)*.28,Math.random()*.2+.07,(Math.random()-.5)*.28));
+  ptSys.push({pts,vels,life:34,maxLife:34});
 }
 function spawnRing(pos){
   const geo=new THREE.RingGeometry(0.1,0.45,12);
@@ -813,58 +772,175 @@ function createNameLabel(name,cc){
   const cv=document.createElement('canvas'),ctx=cv.getContext('2d');
   cv.width=512;cv.height=112;
   ctx.fillStyle='rgba(255,255,255,0.88)';ctx.roundRect(8,14,496,82,20);ctx.fill();
-  ctx.fillStyle='#2c3e50';ctx.font='bold 42px Arial';ctx.textAlign='center';ctx.shadowBlur=0;
+  ctx.fillStyle='#2c3e50';ctx.font='bold 42px Arial';ctx.textAlign='center';
   ctx.fillText(`${san(cc).slice(0,5)} @${san(name).slice(0,13)}`,256,70);
   const tex=new THREE.CanvasTexture(cv);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
-  sp.scale.set(4.4,1.0,1);sp.position.y=3.1;return sp;
+  sp.scale.set(4.4,1.0,1);sp.position.y=3.5;return sp;
 }
 
-// =====================
-// STOCK HUD
-// =====================
 function updateStockHUD(role,stocks,max){
   const el=document.getElementById(`stocks-${role}`);if(!el)return;
   el.innerHTML=Array.from({length:max},(_,i)=>`<div class="stock-dot${i>=stocks?' empty':''}"></div>`).join('');
 }
 
 // =====================
-// FIGHTER
+// MC 3D CHARACTER BUILDER
+// =====================
+function buildMCChar(bodyColorHex,skinTex){
+  const g=new THREE.Group();
+  const mkMat=(hex)=>skinTex
+    ?new THREE.MeshStandardMaterial({color:0xffffff,map:skinTex,roughness:0.6})
+    :new THREE.MeshStandardMaterial({color:hex,roughness:0.55,metalness:0.12});
+
+  // Head
+  const head=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.9,0.9),mkMat(bodyColorHex));
+  head.position.y=2.1;g.add(head);
+  // Body
+  const body=new THREE.Mesh(new THREE.BoxGeometry(0.72,1.02,0.4),mkMat(bodyColorHex));
+  body.position.y=1.22;g.add(body);
+  // Right arm pivot (so we can rotate from shoulder)
+  const armRPiv=new THREE.Group();armRPiv.position.set(-0.56,1.65,0);
+  const armR=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.9,0.32),mkMat(bodyColorHex));armR.position.y=-0.45;armRPiv.add(armR);g.add(armRPiv);
+  // Left arm pivot (bat arm)
+  const armLPiv=new THREE.Group();armLPiv.position.set(0.56,1.65,0);
+  const armL=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.9,0.32),mkMat(bodyColorHex));armL.position.y=-0.45;armLPiv.add(armL);g.add(armLPiv);
+  // Legs
+  const legRPiv=new THREE.Group();legRPiv.position.set(-0.2,0.82,0);
+  const legR=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.85,0.32),mkMat(bodyColorHex));legR.position.y=-0.42;legRPiv.add(legR);g.add(legRPiv);
+  const legLPiv=new THREE.Group();legLPiv.position.set(0.2,0.82,0);
+  const legL=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.85,0.32),mkMat(bodyColorHex));legL.position.y=-0.42;legLPiv.add(legL);g.add(legLPiv);
+
+  g.userData={head,body,armRPiv,armLPiv,legRPiv,legLPiv};
+  return g;
+}
+
+// =====================
+// FIGHTER CLASS
 // =====================
 class Fighter{
-  constructor(bodyColorIdx,name,cc,isPlayer,startPos,role){
+  constructor(bodyColorHex,name,cc,isPlayer,startPos,role,skinTex){
     this.name=name;this.countryCode=cc;this.isPlayer=isPlayer;this.role=role;
     this.alive=true;this.velocity=new THREE.Vector3();this.onGround=true;
     this.stocks=maxStocks;this.mesh=new THREE.Group();
-    const bc=BODY_COLORS[bodyColorIdx]?.val||0x3498db;this.bodyColor=bc;
-    // admini effect flags
-    this.jailMode=false;this.balloonMode=false;this.ragdollMode=false;
-    this.inverseControls=false;this.morphMode=false;this.controlMode=false;
-    this.isTiny=false;
+    this.bodyColor=bodyColorHex;
+    // Animation state
+    this.walkCycle=0;
+    this.animState='idle'; // 'idle','walk','jump','fall','swing'
+    this.swingAnim=0; // 0..1 progress
 
-    const body=new THREE.Mesh(new THREE.CapsuleGeometry(0.5,1,4,8),new THREE.MeshStandardMaterial({color:bc,roughness:0.55,metalness:0.15}));
-    body.position.y=1;this.mesh.add(body);
-    this.batPivot=new THREE.Group();this.batPivot.position.set(0.6,1.2,0);
-    const bat=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.08,1.8,12),new THREE.MeshStandardMaterial({color:BAT_COLOR,roughness:0.6}));
-    bat.rotation.x=Math.PI/2;bat.position.z=0.6;this.batPivot.add(bat);this.mesh.add(this.batPivot);
+    // Build MC character
+    this.charGroup=buildMCChar(bodyColorHex,skinTex);
+    this.mesh.add(this.charGroup);
+
+    // Bat: attached to left arm pivot position, extending forward
+    this.batGroup=new THREE.Group();
+    // Bat handle
+    const handle=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.55,8),new THREE.MeshStandardMaterial({color:0x5d4037,roughness:0.7}));
+    handle.position.y=-0.28;this.batGroup.add(handle);
+    // Bat barrel
+    const barrel=new THREE.Mesh(new THREE.CylinderGeometry(0.145,0.1,0.88,8),new THREE.MeshStandardMaterial({color:BAT_COLOR,roughness:0.6}));
+    barrel.position.y=0.44;this.batGroup.add(barrel);
+    // Bat knob
+    const knob=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,6),new THREE.MeshStandardMaterial({color:0x4e342e}));
+    knob.position.y=-0.56;this.batGroup.add(knob);
+    // Position bat relative to left arm
+    this.batGroup.position.set(0.56,1.65,0);
+    this.batGroup.rotation.z=Math.PI/2; // horizontal hold initially
+    this.mesh.add(this.batGroup);
+
     this.label=createNameLabel(name,cc);this.mesh.add(this.label);
-    this.mesh.position.copy(startPos);scene.add(this.mesh);agents.push(this);
+    this.mesh.position.copy(startPos);scene.add(this.mesh);
+    agents.push(this);
     this.targetPos=new THREE.Vector3().copy(startPos);this.targetRotY=0;
     this.swingCooldown=0;this.lastSent=0;this.isSwinging=false;this.swingTime=0;
-    // CPU
-    this.cpuPhase='approach';this.cpuPhaseTimer=0;this.cpuJumpCD=0;this.cpuAtkCD=0;this.cpuCircleDir=1;
+
+    // CPU state
+    this.cpuPhase='approach';this.cpuPhaseTimer=0;
+    this.cpuJumpCD=0;this.cpuAtkCD=0;this.cpuCircleDir=1;
+    this.cpuAggressionTimer=30;
   }
   respawn(){
     this.alive=true;this.mesh.visible=true;this.velocity.set(0,0,0);
     const side=this.role==='p1'?-1:1;
     this.mesh.position.set(side*5,5,0);this.targetPos.copy(this.mesh.position);
+    this.animState='fall';
   }
   swing(){
-    if(this.swingCooldown>0) return;
-    this.swingCooldown=30;this.isSwinging=true;this.swingTime=0;playSound('swing');
+    if(this.swingCooldown>0)return;
+    this.swingCooldown=25;this.isSwinging=true;this.swingTime=0;
+    this.animState='swing';this.swingAnim=0;
+    playSound('swing');
     if(isOnline&&this.role===myRole&&rateLimit('swing',3))
       update(ref(db,`rooms/${roomId}/${myRole}`),{swinging:Date.now()});
   }
+
+  // =====================
+  // ANIMATION SYSTEM
+  // =====================
+  updateAnim(moving){
+    const ud=this.charGroup.userData;
+    if(!ud) return;
+    const {armRPiv,armLPiv,legRPiv,legLPiv,head}=ud;
+
+    // Bat idle position: horizontal, held at side
+    // Bat swing: swings forward and up in an arc
+
+    if(this.animState==='swing'){
+      this.swingAnim=Math.min(1,this.swingAnim+0.08);
+      const t=this.swingAnim;
+      // Swing arc: arm goes forward and up
+      const swingAngle=Math.sin(t*Math.PI)*(-1.8); // z-rotation of arm
+      const swingZ=Math.sin(t*Math.PI)*(-1.4);
+      armLPiv.rotation.x=swingAngle;
+      armLPiv.rotation.z=0;
+      this.batGroup.rotation.z=Math.PI/2+swingAngle*0.8;
+      this.batGroup.rotation.x=swingZ*0.5;
+      // mirror arm
+      armRPiv.rotation.x=swingAngle*0.3;
+      if(this.swingAnim>=1){this.animState=moving?'walk':'idle';this.swingAnim=0;}
+    } else if(this.animState==='jump'){
+      // Arms spread slightly up, legs bent up
+      armLPiv.rotation.x=lerp(armLPiv.rotation.x,-0.5,0.2);
+      armRPiv.rotation.x=lerp(armRPiv.rotation.x,-0.5,0.2);
+      legLPiv.rotation.x=lerp(legLPiv.rotation.x,0.35,0.2);
+      legRPiv.rotation.x=lerp(legRPiv.rotation.x,0.35,0.2);
+      // Bat held forward-up
+      this.batGroup.rotation.z=lerp(this.batGroup.rotation.z,Math.PI/2-0.3,0.15);
+      this.batGroup.rotation.x=lerp(this.batGroup.rotation.x,-0.3,0.15);
+    } else if(this.animState==='fall'){
+      // Arms out, legs extended
+      armLPiv.rotation.x=lerp(armLPiv.rotation.x,0.8,0.15);
+      armRPiv.rotation.x=lerp(armRPiv.rotation.x,0.8,0.15);
+      legLPiv.rotation.x=lerp(legLPiv.rotation.x,-0.4,0.15);
+      legRPiv.rotation.x=lerp(legRPiv.rotation.x,-0.4,0.15);
+      this.batGroup.rotation.z=lerp(this.batGroup.rotation.z,Math.PI/2+0.5,0.12);
+    } else if(this.animState==='walk'&&moving){
+      this.walkCycle+=0.19;
+      const sw=Math.sin(this.walkCycle)*0.6;
+      armRPiv.rotation.x=lerp(armRPiv.rotation.x,sw,0.4);
+      armLPiv.rotation.x=lerp(armLPiv.rotation.x,-sw*0.4,0.4); // bat arm less swing
+      legRPiv.rotation.x=lerp(legRPiv.rotation.x,-sw,0.4);
+      legLPiv.rotation.x=lerp(legLPiv.rotation.x,sw,0.4);
+      // Bat bobs while walking
+      this.batGroup.rotation.z=lerp(this.batGroup.rotation.z,Math.PI/2,0.15);
+      this.batGroup.rotation.x=lerp(this.batGroup.rotation.x,0,0.15);
+      if(head) head.rotation.y=Math.sin(this.walkCycle*0.5)*0.07;
+    } else {
+      // Idle: relax everything
+      armRPiv.rotation.x=lerp(armRPiv.rotation.x,0.1,0.12);
+      armLPiv.rotation.x=lerp(armLPiv.rotation.x,0,0.12);
+      armRPiv.rotation.z=lerp(armRPiv.rotation.z,0,0.12);
+      armLPiv.rotation.z=lerp(armLPiv.rotation.z,0,0.12);
+      legRPiv.rotation.x=lerp(legRPiv.rotation.x,0,0.12);
+      legLPiv.rotation.x=lerp(legLPiv.rotation.x,0,0.12);
+      // Bat: natural hold at side, angled slightly forward
+      this.batGroup.rotation.z=lerp(this.batGroup.rotation.z,Math.PI/2,0.12);
+      this.batGroup.rotation.x=lerp(this.batGroup.rotation.x,0.3,0.12);
+      if(head) head.rotation.y*=0.88;
+    }
+  }
+
   update(keys){
     if(!this.alive) return;
     if(isOnline&&this.role!==myRole){
@@ -872,20 +948,16 @@ class Fighter{
       let d=this.targetRotY-this.mesh.rotation.y;while(d<-Math.PI)d+=Math.PI*2;while(d>Math.PI)d-=Math.PI*2;
       this.mesh.rotation.y+=d*0.35;
       if(this.isSwinging)this.swingLogic();
+      this.updateAnim(false);
       return;
     }
     if(this.swingCooldown>0)this.swingCooldown--;
     if(this.cpuAtkCD>0)this.cpuAtkCD--;
 
-    // JAIL: can't control, but gravity still applies, knockback still applies
-    const jailed=this.jailMode;
-
-    // Gravity — balloon reduces it
-    const grav = this.balloonMode ? 0.006 : 0.015;
-    this.velocity.y -= grav;
+    const wasOnGround=this.onGround;
+    this.velocity.y-=0.015;
     this.mesh.position.add(this.velocity);
 
-    // Arena boundary
     const d2=Math.sqrt(this.mesh.position.x**2+this.mesh.position.z**2);
     if(this.mesh.position.y<0.2&&d2>=arenaRadius&&d2<arenaRadius+1){
       const sv=new THREE.Vector3(this.mesh.position.x,0,this.mesh.position.z).normalize();
@@ -893,25 +965,17 @@ class Fighter{
     }
     if(this.mesh.position.y<0&&d2<arenaRadius){
       this.mesh.position.y=0;this.velocity.y=0;this.onGround=true;
-      // ragdoll: prevent going underground
-      if(this.ragdollMode){this.mesh.rotation.x=0;this.mesh.rotation.z=0;}
-    } else if(this.mesh.position.y<-10){this.loseStock();}
+    } else if(this.mesh.position.y<-10){this.loseStock();return;}
 
     let move=new THREE.Vector3();
-    if(!jailed&&this.isPlayer&&(this.role===myRole||!isOnline)){
-      let u=keys.up,dn=keys.down,l=keys.left,r=keys.right;
-      if(this.inverseControls){u=keys.down;dn=keys.up;l=keys.right;r=keys.left;}
-      // control: partial input (50% effective), rest is forced
-      const spd=this.controlMode?0.075:(this.isTiny?0.08:0.15);
-      if(u)move.z-=spd;if(dn)move.z+=spd;if(l)move.x-=spd;if(r)move.x+=spd;
-      // jump — tiny: smaller jump
-      const jpower=this.isTiny?0.2:0.3;
-      if(keys.jump&&this.onGround){this.velocity.y=jpower;this.onGround=false;playSound('jump');}
-    } else if(!jailed&&!isOnline&&!this.isPlayer){
+    if(this.isPlayer&&(this.role===myRole||!isOnline)){
+      const spd=0.15;
+      if(keys.up)move.z-=spd;if(keys.down)move.z+=spd;if(keys.left)move.x-=spd;if(keys.right)move.x+=spd;
+      if(keys.jump&&this.onGround){this.velocity.y=0.3;this.onGround=false;playSound('jump');}
+    } else if(!isOnline&&!this.isPlayer){
       move=this.cpuAI();
     }
 
-    // Push apart
     agents.forEach(o=>{
       if(o!==this&&o.alive){
         const diff=new THREE.Vector3().subVectors(this.mesh.position,o.mesh.position);diff.y=0;
@@ -920,13 +984,21 @@ class Fighter{
     });
 
     this.mesh.position.add(move);
-    if(move.length()>0.01)this.mesh.rotation.y=Math.atan2(move.x,move.z);
-    if(this.isSwinging)this.swingLogic();
-    // balloon: also extra horizontal damping
-    const hdamp=this.balloonMode?0.88:0.93;
-    this.velocity.x*=hdamp;this.velocity.z*=hdamp;
+    const moving=move.length()>0.01;
+    if(moving)this.mesh.rotation.y=Math.atan2(move.x,move.z);
 
-    // Online send
+    // Update animation state (not swing — that's set in swing())
+    if(this.animState!=='swing'){
+      if(!this.onGround&&this.velocity.y>0.05) this.animState='jump';
+      else if(!this.onGround&&this.velocity.y<-0.05) this.animState='fall';
+      else if(moving) this.animState='walk';
+      else this.animState='idle';
+    }
+    this.updateAnim(moving);
+
+    if(this.isSwinging)this.swingLogic();
+    this.velocity.x*=0.93;this.velocity.z*=0.93;
+
     if(isOnline&&this.role===myRole&&roomId&&Date.now()-this.lastSent>70&&rateLimit('pos',20)){
       update(ref(db,`rooms/${roomId}/${myRole}`),{
         x:parseFloat(this.mesh.position.x.toFixed(2)),
@@ -936,9 +1008,12 @@ class Fighter{
       });this.lastSent=Date.now();
     }
   }
+
   cpuAI(){
     const move=new THREE.Vector3();
-    const tp=agents[0].mesh.position;
+    const player=agents.find(a=>a!==this&&a.alive);
+    if(!player) return move;
+    const tp=player.mesh.position;
     const toT=new THREE.Vector3().subVectors(tp,this.mesh.position);
     const dist=toT.length();
     const to2=new THREE.Vector3(toT.x,0,toT.z);
@@ -946,68 +1021,56 @@ class Fighter{
     const d2=Math.sqrt(this.mesh.position.x**2+this.mesh.position.z**2);
     if(this.cpuJumpCD>0)this.cpuJumpCD--;
     this.cpuPhaseTimer--;
-    if(d2>arenaRadius*0.78){
-      move.add(center.clone().multiplyScalar(0.1));
-      if(this.onGround&&d2>arenaRadius*0.88&&this.cpuJumpCD<=0){
-        this.velocity.y=0.25;this.velocity.x=center.x*0.2;this.velocity.z=center.z*0.2;
-        this.onGround=false;this.cpuJumpCD=70;
-      }
+    this.cpuAggressionTimer--;
+    if(this.cpuAggressionTimer<=0){this.cpuAggressionTimer=80+Math.floor(Math.random()*50);this.cpuPhase='charge';this.cpuPhaseTimer=55;}
+    if(d2>arenaRadius*0.82){
+      move.add(center.clone().multiplyScalar(0.13));
+      if(this.onGround&&d2>arenaRadius*0.9&&this.cpuJumpCD<=0){this.velocity.y=0.28;this.velocity.x=center.x*0.2;this.velocity.z=center.z*0.2;this.onGround=false;this.cpuJumpCD=60;}
       return move;
     }
     if(this.cpuPhaseTimer<=0){
-      const c=Math.floor(Date.now()/2500)%3;
-      if(c===0){this.cpuPhase='approach';this.cpuPhaseTimer=80;}
-      else if(c===1){this.cpuPhase='circle';this.cpuPhaseTimer=100;this.cpuCircleDir*=-1;}
-      else{this.cpuPhase='retreat';this.cpuPhaseTimer=60;}
+      const r=Math.random();
+      if(r<0.48){this.cpuPhase='approach';this.cpuPhaseTimer=65+Math.floor(Math.random()*40);}
+      else if(r<0.74){this.cpuPhase='circle';this.cpuPhaseTimer=75+Math.floor(Math.random()*40);this.cpuCircleDir*=-1;}
+      else{this.cpuPhase='charge';this.cpuPhaseTimer=45;}
     }
-    if(this.cpuPhase==='approach'){
-      if(dist>2.5)move.add(to2.clone().normalize().multiplyScalar(0.09));
-      if(dist<2.4&&this.cpuAtkCD<=0){this.swing();this.cpuAtkCD=55;}
-      if(dist>4&&this.onGround&&this.cpuJumpCD<=0&&Math.random()<0.015){
-        this.velocity.y=0.28;const n=to2.length();
-        this.velocity.x=(to2.x/Math.max(n,.1))*.2;this.velocity.z=(to2.z/Math.max(n,.1))*.2;
-        this.onGround=false;this.cpuJumpCD=60;
-      }
-    } else if(this.cpuPhase==='circle'){
-      const perp=new THREE.Vector3(-to2.z,0,to2.x).normalize().multiplyScalar(this.cpuCircleDir);
-      if(dist>3.5)move.add(to2.clone().normalize().multiplyScalar(0.06));
-      else if(dist<2.0)move.sub(to2.clone().normalize().multiplyScalar(0.06));
-      move.add(perp.multiplyScalar(0.08));
-      if(dist<2.8&&this.cpuAtkCD<=0){this.swing();this.cpuAtkCD=65;}
+    const atkRange=2.6;
+    if(dist<=atkRange&&this.cpuAtkCD<=0){this.swing();this.cpuAtkCD=18;}
+    const spd=0.1,cspd=0.145;
+    if(this.cpuPhase==='approach'||this.cpuPhase==='charge'){
+      if(dist>atkRange){const s=this.cpuPhase==='charge'?cspd:spd;const n=to2.length()||1;move.x+=to2.x/n*s;move.z+=to2.z/n*s;}
+      if(dist<=atkRange+0.5){const n=to2.length()||1;move.x+=to2.x/n*(cspd*0.4);move.z+=to2.z/n*(cspd*0.4);}
+      if(dist>5&&this.onGround&&this.cpuJumpCD<=0&&Math.random()<0.022){this.velocity.y=0.3;const n=to2.length()||1;this.velocity.x=to2.x/n*0.2;this.velocity.z=to2.z/n*0.2;this.onGround=false;this.cpuJumpCD=48;}
     } else {
-      if(dist<5)move.sub(to2.clone().normalize().multiplyScalar(0.07));
-      else move.add(center.clone().multiplyScalar(0.03));
+      const perp=new THREE.Vector3(-to2.z,0,to2.x).normalize().multiplyScalar(this.cpuCircleDir);
+      if(dist>3.2){const n=to2.length()||1;move.x+=to2.x/n*spd*0.55;move.z+=to2.z/n*spd*0.55;}
+      else if(dist<1.8){const n=to2.length()||1;move.x-=to2.x/n*spd*0.45;move.z-=to2.z/n*spd*0.45;}
+      move.add(perp.multiplyScalar(spd));
     }
     return move;
   }
+
   swingLogic(){
     this.swingTime+=0.2;
-    this.batPivot.rotation.y=Math.sin(this.swingTime*2)*2;
     if(this.role===myRole||!isOnline){
       agents.forEach(o=>{
         if(o!==this&&o.alive){
           const dist=this.mesh.position.distanceTo(o.mesh.position);
           const toO=new THREE.Vector3().subVectors(o.mesh.position,this.mesh.position).normalize();
           const facing=new THREE.Vector3(Math.sin(this.mesh.rotation.y),0,Math.cos(this.mesh.rotation.y));
-          if(dist<2.6&&facing.dot(toO)>0&&this.swingTime>0.5&&this.swingTime<1.0){
+          if(dist<2.9&&facing.dot(toO)>-0.25&&this.swingTime>0.4&&this.swingTime<1.1){
             const p=new THREE.Vector3().subVectors(o.mesh.position,this.mesh.position).normalize();
-            // tiny attacker: reduced knockback
-            const power=this.isTiny?0.28:0.58;
-            // tiny victim: also reduced knockback
-            const victimMult=o.isTiny?0.5:1.0;
-            const vx=p.x*power*victimMult,vy=0.18*victimMult,vz=p.z*power*victimMult;
+            const vx=p.x*0.6,vy=0.22,vz=p.z*0.6;
             if(isOnline){if(rateLimit('hit',2))update(ref(db,`rooms/${roomId}/${o.role}/hit`),{vx,vy,vz,t:Date.now()});}
-            else o.velocity.set(vx,vy,vz);
-            playSound('hit');triggerFlash();
-            spawnParticles(o.mesh.position,o.bodyColor||0xffdd57);
-            spawnRing(o.mesh.position);
+            else{o.velocity.set(vx,vy,vz);o.onGround=false;}
+            playSound('hit');triggerFlash();spawnParticles(o.mesh.position,o.bodyColor||0xffdd57);spawnRing(o.mesh.position);
             if(navigator.vibrate)navigator.vibrate(25);
             this.isSwinging=false;
           }
         }
       });
     }
-    if(this.swingTime>2){this.isSwinging=false;this.batPivot.rotation.y=0;}
+    if(this.swingTime>2){this.isSwinging=false;}
   }
   loseStock(){
     if(!this.alive)return;
@@ -1017,12 +1080,14 @@ class Fighter{
   }
 }
 
+function lerp(a,b,t){return a+(b-a)*t;}
+
 // =====================
-// WIN
+// WIN / RANKING
 // =====================
 function checkWin(loser){
   if(gameState!=='PLAYING')return;
-  gameState='ENDED';closeAdmini();
+  gameState='ENDED';
   const isLoser=isOnline?(loser.role===myRole):loser.isPlayer;
   const et=document.getElementById('end-text');
   et.innerText=isLoser?i18n[lang].lose:i18n[lang].win;
@@ -1035,15 +1100,11 @@ function checkWin(loser){
   const tmr=setTimeout(()=>location.reload(),delay);
   es.addEventListener('click',()=>{clearTimeout(tmr);location.reload();},{once:true});
 }
-
-// =====================
-// RANKING
-// =====================
 async function recordResult(won){
   try{
     const sn=san(nickname).slice(0,13);
     const k=safeKey(sn+'_'+playerUID);
-    const rr=ref(db,`rankings/${k}`);
+    const rr=ref(db,`${RANKING_PATH}/${k}`);
     const snap=await get(rr);const cur=snap.val()||{wins:0,losses:0};
     await update(rr,{wins:(cur.wins||0)+(won?1:0),losses:(cur.losses||0)+(won?0:1),name:sn,country:san(country).slice(0,5),uid:playerUID});
   }catch(e){}
@@ -1052,24 +1113,23 @@ async function loadRanking(){
   const el=document.getElementById('ranking-content');
   el.innerHTML='<div style="color:#95a5a6;text-align:center;padding:16px;font-weight:700">Loading...</div>';
   try{
-    const snap=await get(ref(db,'rankings'));
-    if(!snap.exists()){el.innerHTML='<div style="text-align:center;padding:16px;color:#95a5a6;font-weight:700">No data yet!</div>';return;}
+    const snap=await get(ref(db,RANKING_PATH));
+    if(!snap.exists()){el.innerHTML='<div style="text-align:center;padding:16px;color:#95a5a6;font-weight:700">No data yet! Be the first!</div>';return;}
     const data=Object.values(snap.val()).filter(r=>r&&r.name).sort((a,b)=>(b.wins||0)-(a.wins||0)).slice(0,300);
     const medals=['#1','#2','#3'];
-    const rows=data.map((r,i)=>{
-      const tot=(r.wins||0)+(r.losses||0),pct=tot>0?Math.round(r.wins/tot*100):0;
-      return `<tr><td class="rank-num">${medals[i]||`#${i+1}`}</td><td>${r.country||'??'} @${r.name}</td><td>${r.wins||0}</td><td>${r.losses||0}</td><td>${pct}%</td></tr>`;
-    }).join('');
+    const rows=data.map((r,i)=>{const tot=(r.wins||0)+(r.losses||0),pct=tot>0?Math.round(r.wins/tot*100):0;return`<tr><td class="rank-num">${medals[i]||`#${i+1}`}</td><td>${r.country||'??'} @${r.name}</td><td>${r.wins||0}</td><td>${r.losses||0}</td><td>${pct}%</td></tr>`;}).join('');
     const th=`<thead><tr><th>RANK</th><th>PLAYER</th><th>W</th><th>L</th><th>WIN%</th></tr></thead>`;
     el.innerHTML=`<div class="ranking-scroll"><table class="rank-table">${th}<tbody>${rows}</tbody></table></div>`;
   }catch(e){el.innerHTML='<div style="color:#e74c3c;text-align:center;padding:12px;font-weight:700">Failed to load</div>';}
 }
 
 // =====================
-// FIGHTERS
+// BUILD FIGHTERS
 // =====================
-const p1=new Fighter(selectedBodyIdx,nickname,country,true,new THREE.Vector3(-6,5,0),'p1');
-const p2=new Fighter(0,i18n[lang].cpuName,'??',false,new THREE.Vector3(6,5,0),'p2');
+const skinTex=buildSkinTex3D();
+const bodyColor=getSkinBodyColor3D();
+const p1=new Fighter(bodyColor,nickname,country,true,new THREE.Vector3(-6,5,0),'p1',skinTex);
+const p2=new Fighter(0xe74c3c,i18n[lang].cpuName,'??',false,new THREE.Vector3(6,5,0),'p2',null);
 updateStockHUD('p1',maxStocks,maxStocks);updateStockHUD('p2',maxStocks,maxStocks);
 
 // =====================
@@ -1077,14 +1137,12 @@ updateStockHUD('p1',maxStocks,maxStocks);updateStockHUD('p2',maxStocks,maxStocks
 // =====================
 const input={up:false,down:false,left:false,right:false,jump:false};
 window.onkeydown=e=>{
-  if(admOpen&&e.code!=='KeyQ')return;
   if(e.code==='KeyW'||e.code==='ArrowUp')input.up=true;
   if(e.code==='KeyS'||e.code==='ArrowDown')input.down=true;
   if(e.code==='KeyA'||e.code==='ArrowLeft')input.left=true;
   if(e.code==='KeyD'||e.code==='ArrowRight')input.right=true;
   if(e.code==='Space')input.jump=true;
   if((e.code==='KeyJ'||e.code==='KeyZ')&&gameState==='PLAYING')(myRole==='p1'?p1:p2).swing();
-  if(e.code==='KeyQ'&&isAdmin&&gameState==='PLAYING'){admOpen?closeAdmini():openAdmini();}
 };
 window.onkeyup=e=>{
   if(e.code==='KeyW'||e.code==='ArrowUp')input.up=false;
@@ -1093,23 +1151,12 @@ window.onkeyup=e=>{
   if(e.code==='KeyD'||e.code==='ArrowRight')input.right=false;
   if(e.code==='Space')input.jump=false;
 };
-window.onmousedown=e=>{if(admOpen)return;if(gameState==='PLAYING'&&e.button===0)(myRole==='p1'?p1:p2).swing();};
+window.onmousedown=e=>{if(gameState==='PLAYING'&&e.button===0)(myRole==='p1'?p1:p2).swing();};
 
 const JHALF=60;
 const touchZone=document.getElementById('touch-zone'),joyBase=document.getElementById('joystick-base'),joyKnob=document.getElementById('joystick-knob');
-touchZone.ontouchstart=e=>{
-  const t=e.touches[0];
-  const cx=Math.max(JHALF,Math.min(window.innerWidth-JHALF,t.clientX));
-  const cy=Math.max(JHALF,Math.min(window.innerHeight-JHALF,t.clientY));
-  joyBase.style.display='block';joyBase.style.left=cx+'px';joyBase.style.top=cy+'px';
-  joyBase.dataset.sx=cx;joyBase.dataset.sy=cy;
-};
-touchZone.ontouchmove=e=>{
-  const t=e.touches[0],dx=t.clientX-joyBase.dataset.sx,dy=t.clientY-joyBase.dataset.sy;
-  const dist=Math.min(42,Math.sqrt(dx*dx+dy*dy)),angle=Math.atan2(dy,dx);
-  joyKnob.style.transform=`translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px)`;
-  input.left=dx<-14;input.right=dx>14;input.up=dy<-14;input.down=dy>14;
-};
+touchZone.ontouchstart=e=>{const t=e.touches[0];const cx=Math.max(JHALF,Math.min(window.innerWidth-JHALF,t.clientX));const cy=Math.max(JHALF,Math.min(window.innerHeight-JHALF,t.clientY));joyBase.style.display='block';joyBase.style.left=cx+'px';joyBase.style.top=cy+'px';joyBase.dataset.sx=cx;joyBase.dataset.sy=cy;};
+touchZone.ontouchmove=e=>{const t=e.touches[0],dx=t.clientX-joyBase.dataset.sx,dy=t.clientY-joyBase.dataset.sy;const dist=Math.min(42,Math.sqrt(dx*dx+dy*dy)),angle=Math.atan2(dy,dx);joyKnob.style.transform=`translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px)`;input.left=dx<-14;input.right=dx>14;input.up=dy<-14;input.down=dy>14;};
 touchZone.ontouchend=()=>{joyBase.style.display='none';input.up=input.down=input.left=input.right=false;};
 document.getElementById('action-btn').ontouchstart=e=>{e.preventDefault();if(gameState==='PLAYING')(myRole==='p1'?p1:p2).swing();};
 document.getElementById('jump-btn').ontouchstart=e=>{e.preventDefault();input.jump=true;};
@@ -1124,12 +1171,11 @@ const showM=id=>{
   if(id==='menu-ranking')loadRanking();
   if(id==='menu-settings'){
     const s=JSON.parse(localStorage.getItem('hexSmashSettings')||'{}');
-    document.getElementById('nick-input').value=isAdmin?ADMIN_NAME:(s.nick||'');
-    document.getElementById('nick-input').readOnly=isAdmin;
+    document.getElementById('nick-input').value=s.nick||'';
     if(s.lang)document.getElementById('lang-select').value=s.lang;
     if(s.country)document.getElementById('country-select').value=s.country;
     document.getElementById('uid-display').textContent=playerUID;
-    renderSkinGrid('skin-grid-body',BODY_COLORS,selectedBodyIdx,()=>{});
+    renderSkinGrid20();updateSkinPreview();
   }
 };
 document.getElementById('nav-play').onclick=()=>showM('menu-play');
@@ -1142,6 +1188,9 @@ document.querySelectorAll('.nav-to-main:not(#btn-save)').forEach(b=>b.onclick=()
 document.getElementById('btn-match-back').onclick=()=>showM('menu-play');
 document.getElementById('btn-room-back').onclick=()=>location.reload();
 document.getElementById('btn-cpu').onclick=()=>startCPUGame();
+
+// Skin site link
+document.getElementById('skin-site-link').href='https://batpvp-skins.netlify.app';
 
 // =====================
 // applyL
@@ -1163,21 +1212,21 @@ const applyL=()=>{
 };
 
 // =====================
-// START GAME
+// START GAME (with countdown)
 // =====================
-const startGame=()=>{
+const startGame=async()=>{
   getACtx();
-  const si=parseInt(localStorage.getItem('skinBody')||'5');
-  selectedBodyIdx=si;p1.bodyColor=BODY_COLORS[si]?.val||0x3498db;
-  p1.mesh.children[0].material.color.setHex(p1.bodyColor);
-  gameState='PLAYING';
+  gameState='COUNTDOWN';
   document.getElementById('overlay').classList.add('hidden');
   document.getElementById('battle-ui').style.display='flex';
   if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))document.getElementById('mobile-controls').style.display='block';
+  await runCountdown();
+  gameState='PLAYING';
   startBGM();
 };
 const startCPUGame=()=>{
   isOnline=false;p1.isPlayer=true;p2.isPlayer=false;
+  p2.cpuAggressionTimer=20;p2.cpuPhase='approach';p2.cpuPhaseTimer=30;
   document.getElementById('tag-p1').innerText=`${country} @${nickname}`;
   document.getElementById('tag-p2').innerText=`?? @${i18n[lang].cpuName}`;
   p1.stocks=maxStocks;p2.stocks=maxStocks;
@@ -1189,10 +1238,8 @@ const startCPUGame=()=>{
 // ONLINE
 // =====================
 document.getElementById('btn-create').onclick=async()=>{
-  document.getElementById('btn-create').classList.add('hidden');
-  document.getElementById('join-controls').classList.add('hidden');
-  roomId=Math.floor(1000+Math.random()*9000).toString();
-  isOnline=true;myRole='p1';p1.isPlayer=true;p2.isPlayer=false;
+  document.getElementById('btn-create').classList.add('hidden');document.getElementById('join-controls').classList.add('hidden');
+  roomId=Math.floor(1000+Math.random()*9000).toString();isOnline=true;myRole='p1';p1.isPlayer=true;p2.isPlayer=false;
   const msg=document.getElementById('status-msg');msg.style.display='block';msg.className='loading-dots';msg.innerText='Creating room';
   await sleep(700);
   document.getElementById('room-id-display').innerText=roomId;
@@ -1201,7 +1248,7 @@ document.getElementById('btn-create').onclick=async()=>{
   onDisconnect(rr).remove();
   onValue(ref(db,`rooms/${roomId}/p2`),s=>{
     const d=s.val();
-    if(d&&d.ready&&gameState!=='PLAYING'){
+    if(d&&d.ready&&gameState!=='PLAYING'&&gameState!=='COUNTDOWN'){
       document.getElementById('tag-p1').innerText=`${country} @${nickname}`;
       document.getElementById('tag-p2').innerText=`${d.country} @${d.name||'P2'}`;
       p2.mesh.remove(p2.label);p2.label=createNameLabel(d.name,d.country);p2.mesh.add(p2.label);
@@ -1213,8 +1260,7 @@ document.getElementById('btn-join').onclick=async()=>{
   const id=document.getElementById('room-input').value;if(id.length<4)return;
   const msg=document.getElementById('status-msg');msg.style.display='block';
   document.getElementById('btn-create').classList.add('hidden');document.getElementById('join-controls').classList.add('hidden');
-  msg.innerText='Searching';msg.className='loading-dots';
-  await sleep(700);
+  msg.innerText='Searching';msg.className='loading-dots';await sleep(700);
   const snap=await get(ref(db,`rooms/${id}`));if(!snap.exists()){location.reload();return;}
   roomId=id;isOnline=true;myRole='p2';p1.isPlayer=false;p2.isPlayer=true;
   await update(ref(db,`rooms/${roomId}/p2`),{active:true,name:san(nickname),country:san(country),ready:true,uid:playerUID});
@@ -1226,20 +1272,14 @@ document.getElementById('btn-join').onclick=async()=>{
   p1.stocks=maxStocks;p2.stocks=maxStocks;updateStockHUD('p1',maxStocks,maxStocks);updateStockHUD('p2',maxStocks,maxStocks);startGame();
 };
 document.getElementById('btn-matchmaking').onclick=async()=>{
-  showM('menu-room');
-  document.getElementById('btn-create').classList.add('hidden');document.getElementById('join-controls').classList.add('hidden');
+  showM('menu-room');document.getElementById('btn-create').classList.add('hidden');document.getElementById('join-controls').classList.add('hidden');
   const msg=document.getElementById('status-msg');msg.style.display='block';msg.innerText='Matching';msg.className='loading-dots';
   let tl=15;
   const timer=setInterval(()=>{tl--;if(tl<=0){clearInterval(timer);remove(ref(db,`matchmaking/${playerUID}`)).then(()=>location.reload());}},1000);
   let matched=null;
-  await runTransaction(ref(db,'matchmaking'),cur=>{
-    if(!cur)return cur;const keys=Object.keys(cur);if(!keys.length)return cur;
-    const k=keys[0];if(k===playerUID)return cur;
-    matched={key:k,...cur[k]};delete cur[k];return cur;
-  }).catch(()=>{matched=null;});
+  await runTransaction(ref(db,'matchmaking'),cur=>{if(!cur)return cur;const keys=Object.keys(cur);if(!keys.length)return cur;const k=keys[0];if(k===playerUID)return cur;matched={key:k,...cur[k]};delete cur[k];return cur;}).catch(()=>{matched=null;});
   if(matched){
-    clearInterval(timer);
-    roomId=matched.room;myRole='p2';p1.isPlayer=false;p2.isPlayer=true;isOnline=true;
+    clearInterval(timer);roomId=matched.room;myRole='p2';p1.isPlayer=false;p2.isPlayer=true;isOnline=true;
     await update(ref(db,`rooms/${roomId}/p2`),{active:true,name:san(nickname),country:san(country),ready:true,uid:playerUID});
     onDisconnect(ref(db,`rooms/${roomId}`)).remove();
     const rs=await get(ref(db,`rooms/${roomId}/p1`));const p1d=rs.val();
@@ -1256,7 +1296,7 @@ document.getElementById('btn-matchmaking').onclick=async()=>{
     myRole='p1';p1.isPlayer=true;p2.isPlayer=false;isOnline=true;
     onValue(ref(db,`rooms/${roomId}/p2`),s=>{
       const d=s.val();
-      if(d&&d.ready&&gameState!=='PLAYING'){
+      if(d&&d.ready&&gameState!=='PLAYING'&&gameState!=='COUNTDOWN'){
         clearInterval(timer);remove(ref(db,`matchmaking/${playerUID}`));
         document.getElementById('tag-p1').innerText=`${country} @${nickname}`;
         document.getElementById('tag-p2').innerText=`${d.country} @${d.name}`;
@@ -1267,9 +1307,6 @@ document.getElementById('btn-matchmaking').onclick=async()=>{
   }
 };
 
-// =====================
-// SYNC ONLINE
-// =====================
 function syncO(){
   const opp=myRole==='p1'?p2:p1,me=myRole==='p1'?p1:p2,or=myRole==='p1'?'p2':'p1';
   onValue(ref(db,`rooms/${roomId}/${or}`),s=>{
@@ -1284,23 +1321,6 @@ function syncO(){
     playSound('hit');triggerFlash();spawnParticles(me.mesh.position,me.bodyColor||0xffdd57);
     if(navigator.vibrate)navigator.vibrate(35);
   });
-  // Receive admini commands targeting me
-  onValue(ref(db,`rooms/${roomId}/${myRole}/admini`),s=>{
-    const d=s.val();if(!d||!d.cmd||!d.t)return;
-    const cmd=d.cmd;
-    if(!CMD_CONFIG.hasOwnProperty(cmd))return;
-    // Clear immediately to avoid re-triggering
-    update(ref(db,`rooms/${roomId}/${myRole}/admini`),{cmd:null,t:null});
-    // Apply effect to self (as victim)
-    admApplyEffect(cmd,'self',me);
-    // For nightvision/jumpscare on victim's screen
-    if(cmd==='nightvision'){
-      const nv=document.getElementById('nv-overlay'),nvv=document.getElementById('nv-vignette');
-      nv.style.display='block';nvv.style.display='block';
-      setTimeout(()=>{nv.style.display='none';nvv.style.display='none';},CMD_CONFIG.nightvision.dur*1000);
-    }
-    if(cmd==='jumpscare') showJumpscare();
-  });
 }
 
 // =====================
@@ -1308,10 +1328,13 @@ function syncO(){
 // =====================
 function animate(){
   requestAnimationFrame(animate);
-  if(gameState==='PLAYING'){
-    p1.update(input);p2.update({});
-    if(isAdmin) adminiPerFrame();
+  if(gameState==='MENU'){
+    updateDemoFighter(demoP1,demoP2);updateDemoFighter(demoP2,demoP1);
+    demoCamAngle+=0.004;const camR=22,camH=14;
+    demoCamera.position.set(Math.sin(demoCamAngle)*camR,camH,Math.cos(demoCamAngle)*camR);
+    demoCamera.lookAt(0,1,0);demoRenderer.render(demoScene,demoCamera);
   }
+  if(gameState==='PLAYING'){p1.update(input);p2.update({});}
   updatePtSys();
   const mid=new THREE.Vector3().addVectors(p1.mesh.position,p2.mesh.position).multiplyScalar(0.5);
   const dist=p1.mesh.position.distanceTo(p2.mesh.position);
@@ -1321,8 +1344,19 @@ function animate(){
   renderer.render(scene,camera);
 }
 const sleep=m=>new Promise(r=>setTimeout(r,m));
-window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
-applyL();animate();
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);
+  demoCamera.aspect=window.innerWidth/window.innerHeight;demoCamera.updateProjectionMatrix();demoRenderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+// =====================
+// INIT
+// =====================
+(async()=>{
+  await loadSkinStorage();
+  applyL();
+  animate();
+})();
 </script>
 </body>
 </html>
