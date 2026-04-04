@@ -14,26 +14,10 @@ body{overflow:hidden;background:#87ceeb;font-family:'Nunito',sans-serif;touch-ac
 canvas{display:block;}
 
 /* ===== LINE BLOCK SCREEN ===== */
-#line-block{
-  position:fixed;inset:0;z-index:9999;
-  background:linear-gradient(160deg,#1a1a2e 0%,#16213e 100%);
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  gap:18px;padding:32px;text-align:center;
-}
+#line-block{position:fixed;inset:0;z-index:9999;background:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;}
 #line-block.active{display:flex;}
-.lb-icon{font-size:64px;}
-.lb-title{font-family:'Fredoka One',cursive;font-size:28px;color:#e74c3c;text-shadow:0 3px 0 #7f1c1c;}
-.lb-sub{font-size:14px;color:rgba(255,255,255,0.7);font-weight:700;line-height:1.7;max-width:300px;}
-.lb-btn{
-  background:#4fc3f7;color:#fff;
-  font-family:'Fredoka One',cursive;font-size:20px;
-  padding:16px 36px;border-radius:18px;border:none;cursor:pointer;
-  box-shadow:0 5px 0 #0288d1;text-decoration:none;display:inline-block;
-  margin-top:8px;transition:transform .15s;
-}
-.lb-btn:active{transform:scale(.96) translateY(2px);}
-.lb-hint{font-size:11px;color:rgba(255,255,255,0.35);font-weight:700;letter-spacing:1px;}
-
+.lb-title{font-family:'Fredoka One',cursive;font-size:36px;color:#FF6B6B;}
+.lb-btn{font-family:'Fredoka One',cursive;font-size:22px;color:#FF6B6B;text-decoration:none;background:none;border:none;cursor:pointer;padding:0;}
 /* ===== OVERLAY ===== */
 #overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:100;}
 #demo-canvas-wrap{position:absolute;inset:0;z-index:0;overflow:hidden;}
@@ -183,11 +167,8 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
 <body>
 <!-- LINE BLOCK SCREEN -->
 <div id="line-block">
-  <div class="lb-icon">🦇</div>
-  <div class="lb-title">サービス終了</div>
-  <div class="lb-sub">Bat PVPはLINEアプリ内では<br>プレイできません。<br>ブラウザで開いてプレイしてください。</div>
-  <a class="lb-btn" id="lb-open-btn" href="#">ブラウザで遊ぶ</a>
-  <div class="lb-hint">Safari / Chrome などのブラウザで開きます</div>
+  <div class="lb-title">Service ended</div>
+  <a class="lb-btn" id="lb-open-btn" href="#">Open on site</a>
 </div>
 
 <div id="hit-flash"></div>
@@ -464,9 +445,15 @@ function saveSkinStorage(){
 }
 
 async function loadSkinStorage(){
+  // Always ensure hoodie builtin is in slot 1
+  async function injectHoodie(){
+    const dataURL=generateHoodieSkinDataURL();
+    const img=await loadImg(dataURL);
+    if(img) skins[1]={name:'Black Hoodie',dataURL,img,builtin:true};
+  }
   try{
     const raw=localStorage.getItem(SKIN_STORAGE_KEY);
-    if(!raw) return;
+    if(!raw){await injectHoodie();return;}
     const arr=JSON.parse(raw);
     for(let i=0;i<Math.min(arr.length,MAX_SKINS);i++){
       if(i===0){skins[0]={name:'Default',dataURL:null,img:null};continue;}
@@ -477,12 +464,60 @@ async function loadSkinStorage(){
         skins[i]={name:entry.name||'Skin '+(i+1),dataURL:entry.dataURL,img};
       }
     }
+    if(!skins[1]) await injectHoodie(); // always fill slot 1 if empty
     const sel=parseInt(localStorage.getItem(SKIN_SEL_KEY)||'0');
     selectedSkinIdx=skins[sel]?sel:0;
-  }catch(e){}
+  }catch(e){await injectHoodie();}
 }
 
 function loadImg(src){return new Promise(r=>{const img=new Image();img.onload=()=>r(img);img.onerror=()=>r(null);img.src=src;});}
+
+// =====================
+// BUILT-IN SKIN: Black Hoodie (slot 1)
+// Generates a 64x64 Minecraft-format PNG skin via Canvas
+// =====================
+function generateHoodieSkinDataURL(){
+  const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+  const c=cv.getContext('2d');
+  c.clearRect(0,0,64,64);
+  const skin='#e8e0d0'; // same face/hand tone as default grey
+  const blk='#1c1c1c';  // hoodie/pants black
+  const dgr='#2d2d2d';  // dark grey details
+  const wht='#f0f0f0';  // drawstring white
+
+  // HEAD (8,8) 8x8 — face = skin, top = hood
+  c.fillStyle=skin; c.fillRect(8,8,8,8);
+  c.fillStyle=blk;  c.fillRect(8,8,8,3);   // hood top
+  c.fillStyle=dgr;  c.fillRect(8,11,8,1);  // hood brim
+  // eyes
+  c.fillStyle='#3a2510'; c.fillRect(10,11,2,2); c.fillRect(14,11,2,2);
+
+  // BODY (20,20) 8x12 — black hoodie
+  c.fillStyle=blk; c.fillRect(20,20,8,12);
+  c.fillStyle=dgr; c.fillRect(24,20,1,9);  // centre zip
+  c.fillStyle=wht; c.fillRect(23,21,1,5);  // left drawstring
+  c.fillStyle=wht; c.fillRect(25,21,1,5);  // right drawstring
+  c.fillStyle=dgr; c.fillRect(22,27,4,4);  // kangaroo pocket
+
+  // RIGHT ARM (44,20) 4x12 — black sleeve, skin cuff
+  c.fillStyle=blk;  c.fillRect(44,20,4,10);
+  c.fillStyle=skin; c.fillRect(44,30,4,2);
+
+  // LEFT ARM (36,52) 4x12 — black sleeve, skin cuff
+  c.fillStyle=blk;  c.fillRect(36,52,4,10);
+  c.fillStyle=skin; c.fillRect(36,62,4,2);
+
+  // RIGHT LEG (4,20) 4x12 — black pants
+  c.fillStyle=blk; c.fillRect(4,20,4,12);
+  c.fillStyle=dgr; c.fillRect(4,25,4,1); // knee crease
+
+  // LEFT LEG (20,52) 4x12 — black pants
+  c.fillStyle=blk; c.fillRect(20,52,4,12);
+  c.fillStyle=dgr; c.fillRect(20,57,4,1); // knee crease
+
+  return cv.toDataURL('image/png');
+}
+
 
 // =====================
 // SKIN DRAWING
@@ -539,7 +574,7 @@ function renderSkinGrid10(){
       const cv=document.createElement('canvas');cv.width=40;cv.height=80;
       drawSkinToCanvas(s.img||null,cv);slot.appendChild(cv);
       slot.onclick=()=>{selectedSkinIdx=i;renderSkinGrid10();updateSkinPreview();};
-      if(i>0){
+      if(i>0&&!s.builtin){
         const del=document.createElement('div');del.className='slot-del';del.textContent='×';
         del.onclick=(e)=>{e.stopPropagation();deleteSkin(i);};slot.appendChild(del);
       }
@@ -700,10 +735,7 @@ demoScene.add(new THREE.DirectionalLight(0xffffff,2));
 demoScene.add(new THREE.AmbientLight(0xffffff,0.8));
 const demoArena=new THREE.Mesh(new THREE.CylinderGeometry(arenaRadius,arenaRadius+1.2,2,6),new THREE.MeshStandardMaterial({color:STAGE.arena}));
 demoArena.position.y=-1;demoScene.add(demoArena);
-const demoEdge=new THREE.Mesh(new THREE.CylinderGeometry(arenaRadius+0.06,arenaRadius+0.06,0.06,6),new THREE.MeshStandardMaterial({color:STAGE.edge}));
-demoEdge.position.y=0.06;demoScene.add(demoEdge);
-const demoFloor=new THREE.Mesh(new THREE.CylinderGeometry(arenaRadius-0.1,arenaRadius-0.1,0.05,6),new THREE.MeshStandardMaterial({color:STAGE.edge}));
-demoFloor.position.y=0.02;demoScene.add(demoFloor);
+// demoEdge/demoFloor removed to fix grey stripe bug
 
 function makeDemoFighter(color,x){
   const g=new THREE.Group();
@@ -845,7 +877,7 @@ function buildBatAttached(armLPiv){
   // Bat pivot is at the hand (bottom of arm, below shoulder by ~0.9)
   const batGrip=new THREE.Group();
   // Position at end of arm (hand position relative to shoulder pivot)
-  batGrip.position.set(0, -0.9, 0);
+  batGrip.position.set(0.18, -0.85, 0.1); // offset outward from hand
 
   // Handle
   const handle=new THREE.Mesh(
@@ -946,39 +978,30 @@ class Fighter{
       this.swingAnim=Math.min(1,this.swingAnim+0.09);
       const t=this.swingAnim;
 
-      // 3-phase swing: windup (0~0.25) → strike (0.25~0.65) → followthrough (0.65~1.0)
-      let armX, armZ, batZ;
+      // Swing: only rotate armLPiv — bat rides with the arm naturally
+      let armX, armZ;
       if(t < 0.25){
-        // Windup: arm goes back and up
         const p=t/0.25;
-        armX = lerp(0, -0.8, p);   // arm back
-        armZ = lerp(-0.15, -0.3, p);
-        batZ = lerp(0, 0.4, p);    // bat tip tilts back
+        armX = lerp(0.2, -1.0, p);
+        armZ = lerp(0.15, 0.5, p);
       } else if(t < 0.65){
-        // Strike: arm whips forward fast
         const p=(t-0.25)/0.4;
-        armX = lerp(-0.8, 1.8, p); // strong forward swing
-        armZ = lerp(-0.3, 0.1, p);
-        batZ = lerp(0.4, -0.5, p); // bat whips through
+        armX = lerp(-1.0, 2.0, p);
+        armZ = lerp(0.5, -0.2, p);
       } else {
-        // Follow through: arm continues and decelerates
         const p=(t-0.65)/0.35;
-        armX = lerp(1.8, 1.2, p);
-        armZ = lerp(0.1, 0.2, p);
-        batZ = lerp(-0.5, -0.2, p);
+        armX = lerp(2.0, 1.2, p);
+        armZ = lerp(-0.2, 0.1, p);
       }
-
       armLPiv.rotation.x = armX;
       armLPiv.rotation.z = armZ;
-      // Bat grip rotates for extra arc effect
-      this.batGrip.rotation.z = batZ;
-      // Counter-arm mirrors slightly
-      armRPiv.rotation.x = lerp(armRPiv.rotation.x, -armX*0.25, 0.4);
+      armRPiv.rotation.x = lerp(armRPiv.rotation.x, -armX*0.2, 0.35);
 
       if(this.swingAnim>=1){
         this.animState=moving?'walk':'idle';
         this.swingAnim=0;
-        this.batGrip.rotation.z=0;
+        armLPiv.rotation.x=0.2; armLPiv.rotation.z=0.15;
+        armRPiv.rotation.x=0.1; armRPiv.rotation.z=0.0;
       }
 
     } else if(this.animState==='jump'){
@@ -989,7 +1012,6 @@ class Fighter{
       armRPiv.rotation.z=lerp(armRPiv.rotation.z,0.1,0.18);
       legLPiv.rotation.x=lerp(legLPiv.rotation.x,0.4,0.18);
       legRPiv.rotation.x=lerp(legRPiv.rotation.x,0.4,0.18);
-      this.batGrip.rotation.z=lerp(this.batGrip.rotation.z,0,0.15);
 
     } else if(this.animState==='fall'){
       // Falling: arms slightly out, legs stretched
@@ -999,7 +1021,6 @@ class Fighter{
       armRPiv.rotation.z=lerp(armRPiv.rotation.z,0.15,0.12);
       legLPiv.rotation.x=lerp(legLPiv.rotation.x,-0.3,0.12);
       legRPiv.rotation.x=lerp(legRPiv.rotation.x,-0.3,0.12);
-      this.batGrip.rotation.z=lerp(this.batGrip.rotation.z,0,0.1);
 
     } else if(this.animState==='walk'&&moving){
       this.walkCycle+=0.19;
@@ -1014,7 +1035,6 @@ class Fighter{
       legRPiv.rotation.x=lerp(legRPiv.rotation.x,-sw,0.35);
       legLPiv.rotation.x=lerp(legLPiv.rotation.x,sw,0.35);
       if(head) head.rotation.y=Math.sin(this.walkCycle*0.5)*0.06;
-      this.batGrip.rotation.z=lerp(this.batGrip.rotation.z,0,0.15);
 
     } else {
       // Idle: relaxed stance, bat held naturally at side
@@ -1026,7 +1046,6 @@ class Fighter{
       legLPiv.rotation.x=lerp(legLPiv.rotation.x,0,0.1);
       // Idle bat bob: gentle up-down sway
       const idleBob=Math.sin(Date.now()*0.002)*0.04;
-      this.batGrip.rotation.z=lerp(this.batGrip.rotation.z,idleBob,0.08);
       if(head) head.rotation.y*=0.9;
     }
   }
@@ -1115,7 +1134,7 @@ class Fighter{
     if(this.cpuJumpCD>0)this.cpuJumpCD--;
     this.cpuPhaseTimer--;
     this.cpuAggressionTimer--;
-    if(this.cpuAggressionTimer<=0){this.cpuAggressionTimer=80+Math.floor(Math.random()*50);this.cpuPhase='charge';this.cpuPhaseTimer=55;}
+    if(this.cpuAggressionTimer<=0){this.cpuAggressionTimer=130+Math.floor(Math.random()*80);this.cpuPhase='charge';this.cpuPhaseTimer=55;}
     if(d2>arenaRadius*0.82){
       move.add(center.clone().multiplyScalar(0.13));
       if(this.onGround&&d2>arenaRadius*0.9&&this.cpuJumpCD<=0){this.velocity.y=0.28;this.velocity.x=center.x*0.2;this.velocity.z=center.z*0.2;this.onGround=false;this.cpuJumpCD=60;}
@@ -1128,8 +1147,8 @@ class Fighter{
       else{this.cpuPhase='charge';this.cpuPhaseTimer=45;}
     }
     const atkRange=2.6;
-    if(dist<=atkRange&&this.cpuAtkCD<=0){this.swing();this.cpuAtkCD=18;}
-    const spd=0.1,cspd=0.145;
+    if(dist<=atkRange&&this.cpuAtkCD<=0){this.swing();this.cpuAtkCD=28;}
+    const spd=0.085,cspd=0.115;
     if(this.cpuPhase==='approach'||this.cpuPhase==='charge'){
       if(dist>atkRange){const s=this.cpuPhase==='charge'?cspd:spd;const n=to2.length()||1;move.x+=to2.x/n*s;move.z+=to2.z/n*s;}
       if(dist<=atkRange+0.5){const n=to2.length()||1;move.x+=to2.x/n*(cspd*0.4);move.z+=to2.z/n*(cspd*0.4);}
@@ -1169,6 +1188,7 @@ class Fighter{
   loseStock(){
     if(!this.alive)return;
     this.stocks--;playSound('stock');updateStockHUD(this.role,this.stocks,maxStocks);
+    if(isOnline&&roomId){try{update(ref(db,`rooms/${roomId}/${this.role}`),{stocks:this.stocks,stockTs:Date.now()});}catch(e){}}
     if(this.stocks<=0){this.alive=false;this.mesh.visible=false;playSound('fall');checkWin(this);}
     else{this.alive=false;this.mesh.visible=false;playSound('fall');setTimeout(()=>this.respawn(),1200);}
   }
@@ -1279,9 +1299,9 @@ window.onmousedown=e=>{if(gameState==='PLAYING'&&e.button===0)(myRole==='p1'?p1:
 
 const JHALF=60;
 const touchZone=document.getElementById('touch-zone'),joyBase=document.getElementById('joystick-base'),joyKnob=document.getElementById('joystick-knob');
-touchZone.ontouchstart=e=>{const t=e.touches[0];const cx=Math.max(JHALF,Math.min(window.innerWidth-JHALF,t.clientX));const cy=Math.max(JHALF,Math.min(window.innerHeight-JHALF,t.clientY));joyBase.style.display='block';joyBase.style.left=cx+'px';joyBase.style.top=cy+'px';joyBase.dataset.sx=cx;joyBase.dataset.sy=cy;};
-touchZone.ontouchmove=e=>{const t=e.touches[0],dx=t.clientX-joyBase.dataset.sx,dy=t.clientY-joyBase.dataset.sy;const dist=Math.min(42,Math.sqrt(dx*dx+dy*dy)),angle=Math.atan2(dy,dx);joyKnob.style.transform=`translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px)`;input.left=dx<-14;input.right=dx>14;input.up=dy<-14;input.down=dy>14;};
-touchZone.ontouchend=()=>{joyBase.style.display='none';input.up=input.down=input.left=input.right=false;};
+touchZone.ontouchstart=e=>{e.preventDefault();const t=e.touches[0];const cx=Math.max(JHALF,Math.min(window.innerWidth-JHALF,t.clientX));const cy=Math.max(JHALF,Math.min(window.innerHeight-JHALF,t.clientY));joyBase.style.display='block';joyBase.style.left=cx+'px';joyBase.style.top=cy+'px';joyBase.dataset.sx=String(cx);joyBase.dataset.sy=String(cy);};
+touchZone.ontouchmove=e=>{e.preventDefault();const t=e.touches[0],dx=t.clientX-parseFloat(joyBase.dataset.sx),dy=t.clientY-parseFloat(joyBase.dataset.sy);const dist=Math.min(42,Math.sqrt(dx*dx+dy*dy)),angle=Math.atan2(dy,dx);joyKnob.style.transform=`translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px)`;input.left=dx<-14;input.right=dx>14;input.up=dy<-14;input.down=dy>14;};
+touchZone.ontouchend=()=>{joyBase.style.display='none';joyKnob.style.transform='translate(0px,0px)';input.up=input.down=input.left=input.right=false;};
 document.getElementById('action-btn').ontouchstart=e=>{e.preventDefault();if(gameState==='PLAYING')(myRole==='p1'?p1:p2).swing();};
 document.getElementById('jump-btn').ontouchstart=e=>{e.preventDefault();input.jump=true;};
 document.getElementById('jump-btn').ontouchend=()=>{input.jump=false;};
@@ -1348,7 +1368,7 @@ const startGame=async()=>{
 };
 const startCPUGame=()=>{
   isOnline=false;p1.isPlayer=true;p2.isPlayer=false;
-  p2.cpuAggressionTimer=20;p2.cpuPhase='approach';p2.cpuPhaseTimer=30;
+  p2.cpuAggressionTimer=100;p2.cpuPhase='approach';p2.cpuPhaseTimer=60;
   document.getElementById('tag-p1').innerText=`${country} @${nickname}`;
   document.getElementById('tag-p2').innerText=`?? @${i18n[lang].cpuName}`;
   p1.stocks=maxStocks;p2.stocks=maxStocks;
@@ -1435,6 +1455,7 @@ function syncO(){
     const d=s.val();if(!d)return;
     if(d.x!==undefined){opp.targetPos.set(clamp(d.x,-30,30),clamp(d.y,-20,30),clamp(d.z,-30,30));opp.targetRotY=clamp(d.ry,-Math.PI*2,Math.PI*2);}
     if(d.swinging&&!opp.isSwinging)opp.swing();
+    if(d.stocks!==undefined&&d.stockTs){const ns=Math.max(0,Math.min(maxStocks,parseInt(d.stocks)||0));if(ns!==opp.stocks){opp.stocks=ns;updateStockHUD(opp.role,ns,maxStocks);if(ns<=0&&opp.alive){opp.alive=false;opp.mesh.visible=false;checkWin(opp);}}}
   });
   onValue(ref(db,`rooms/${roomId}/${myRole}/hit`),s=>{
     const v=s.val();if(!v||!v.t)return;
@@ -1477,7 +1498,7 @@ function animate(){
     camera.updateProjectionMatrix();
   }
 
-  renderer.render(scene,camera);
+  if(gameState!=='MENU') renderer.render(scene,camera);
 }
 
 const sleep=m=>new Promise(r=>setTimeout(r,m));
@@ -1491,6 +1512,17 @@ window.addEventListener('resize',()=>{
 // =====================
 (async()=>{
   await loadSkinStorage();
+  // Refresh p1 skin texture now that storage is loaded
+  const _newTex=buildSkinTex3D();
+  const _newColor=getSkinBodyColor3D();
+  p1.charGroup.traverse(m=>{
+    if(m.isMesh&&m.material){
+      if(_newTex){m.material.map=_newTex;m.material.color.setHex(0xffffff);}
+      else{m.material.map=null;m.material.color.setHex(_newColor);}
+      m.material.needsUpdate=true;
+    }
+  });
+  p1.bodyColor=_newColor;
   applyL();
   animate();
 })();
