@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="google-site-verification" content="JQxaQ3hjD6IOdglF8gHJhUlHT6vWM_Qs3azW5LAB7bc" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Bat PVP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,6 +12,27 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{overflow:hidden;background:#87ceeb;font-family:'Nunito',sans-serif;touch-action:none;color:var(--text-dark);width:100vw;height:100vh;-webkit-tap-highlight-color:transparent;}
 canvas{display:block;}
+
+/* ===== LINE BLOCK SCREEN ===== */
+#line-block{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(160deg,#1a1a2e 0%,#16213e 100%);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;padding:32px;text-align:center;
+}
+#line-block.active{display:flex;}
+.lb-icon{font-size:64px;}
+.lb-title{font-family:'Fredoka One',cursive;font-size:28px;color:#e74c3c;text-shadow:0 3px 0 #7f1c1c;}
+.lb-sub{font-size:14px;color:rgba(255,255,255,0.7);font-weight:700;line-height:1.7;max-width:300px;}
+.lb-btn{
+  background:#4fc3f7;color:#fff;
+  font-family:'Fredoka One',cursive;font-size:20px;
+  padding:16px 36px;border-radius:18px;border:none;cursor:pointer;
+  box-shadow:0 5px 0 #0288d1;text-decoration:none;display:inline-block;
+  margin-top:8px;transition:transform .15s;
+}
+.lb-btn:active{transform:scale(.96) translateY(2px);}
+.lb-hint{font-size:11px;color:rgba(255,255,255,0.35);font-weight:700;letter-spacing:1px;}
 
 /* ===== OVERLAY ===== */
 #overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:100;}
@@ -53,6 +75,8 @@ canvas{display:block;}
 .btn-mint:hover{transform:translateY(-2px);box-shadow:0 7px 0 #388e3c;}
 .btn-back{background:#ecf0f1;color:#7f8c8d;box-shadow:0 4px 0 #bdc3c7;font-size:15px;padding:11px;}
 .btn-back:hover{background:#dfe6e9;}
+.btn-danger{background:#e74c3c;color:#fff;box-shadow:0 5px 0 #922b21;font-size:15px;}
+.btn-danger:hover{transform:translateY(-2px);box-shadow:0 7px 0 #922b21;}
 label{font-size:12px;font-weight:900;color:#95a5a6;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
 input[type=text],select{padding:11px 14px;border-radius:12px;border:2px solid #ecf0f1;font-size:15px;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text-dark);background:#fff;width:100%;transition:border-color .2s;}
 input[type=text]:focus,select:focus{outline:none;border-color:var(--sky);}
@@ -66,8 +90,8 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
 .skin-preview-name{font-family:'Fredoka One',cursive;font-size:15px;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .skin-preview-hint{font-size:10px;color:#95a5a6;font-weight:700;margin-top:3px;line-height:1.4;}
 
-/* 5x4 grid = 20 slots */
-.skin-grid-20{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0;}
+/* 5x2 grid = 10 slots */
+.skin-grid-10{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0;}
 .skin-slot{
   aspect-ratio:3/4;border-radius:10px;cursor:pointer;
   border:2.5px solid transparent;transition:transform .15s,border-color .15s;
@@ -93,23 +117,7 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
 .skin-slot-default .slot-del{display:none!important;}
 .skin-slot-add .slot-del{display:none!important;}
 .skin-count-label{font-size:11px;color:#95a5a6;font-weight:700;text-align:right;}
-
 #skin-upload-input{display:none;}
-
-/* ===== SKIN SITE LINK ===== */
-.skin-site-banner{
-  background:linear-gradient(135deg,#1a1a2e,#16213e);
-  border-radius:14px;padding:12px 14px;
-  display:flex;align-items:center;gap:10px;
-  cursor:pointer;transition:transform .15s;
-  text-decoration:none;
-}
-.skin-site-banner:hover{transform:translateY(-2px);}
-.skin-site-icon{font-size:24px;flex-shrink:0;}
-.skin-site-text{flex:1;}
-.skin-site-title{font-family:'Fredoka One',cursive;font-size:14px;color:#fff;}
-.skin-site-sub{font-size:10px;color:rgba(255,255,255,0.5);font-weight:700;letter-spacing:1px;margin-top:2px;}
-.skin-site-arrow{color:rgba(255,255,255,0.4);font-size:18px;}
 
 /* ===== BATTLE UI ===== */
 #battle-ui{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:95%;max-width:680px;display:none;justify-content:space-between;align-items:center;pointer-events:none;z-index:10;gap:10px;}
@@ -160,6 +168,9 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
 #hit-flash{position:absolute;inset:0;background:white;opacity:0;pointer-events:none;z-index:200;transition:opacity .08s;}
 .uid-box{background:#f5f6fa;border-radius:12px;padding:10px 14px;font-family:'Fredoka One',cursive;font-size:20px;letter-spacing:4px;color:var(--coral);text-align:center;border:2px solid #ecf0f1;user-select:all;}
 .uid-hint{font-size:11px;color:#bdc3c7;text-align:center;font-weight:700;letter-spacing:1px;}
+.danger-zone{background:#fff5f5;border:2px solid #fde8e8;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.danger-zone-title{font-size:11px;font-weight:900;color:#e74c3c;letter-spacing:2px;text-transform:uppercase;}
+.danger-zone-desc{font-size:11px;color:#95a5a6;font-weight:700;line-height:1.5;}
 @media(max-width:480px){
   .game-title{font-size:44px;}
   .menu-card{padding:20px 18px;min-width:unset;}
@@ -170,6 +181,15 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
 </style>
 </head>
 <body>
+<!-- LINE BLOCK SCREEN -->
+<div id="line-block">
+  <div class="lb-icon">🦇</div>
+  <div class="lb-title">サービス終了</div>
+  <div class="lb-sub">Bat PVPはLINEアプリ内では<br>プレイできません。<br>ブラウザで開いてプレイしてください。</div>
+  <a class="lb-btn" id="lb-open-btn" href="#">ブラウザで遊ぶ</a>
+  <div class="lb-hint">Safari / Chrome などのブラウザで開きます</div>
+</div>
+
 <div id="hit-flash"></div>
 
 <!-- COUNTDOWN -->
@@ -247,10 +267,10 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
         <option value="fr">French</option><option value="de">German</option><option value="es">Spanish</option>
       </select>
 
-      <!-- SKIN GRID -->
+      <!-- SKIN GRID (10 slots) -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
         <div class="skin-section-title" style="margin:0">SKIN</div>
-        <div class="skin-count-label" id="skin-count-lbl">1 / 20</div>
+        <div class="skin-count-label" id="skin-count-lbl">1 / 10</div>
       </div>
 
       <!-- Current skin preview -->
@@ -258,22 +278,12 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
         <canvas id="skin-preview-canvas" width="40" height="80" style="width:40px;height:80px;"></canvas>
         <div class="skin-preview-info">
           <div class="skin-preview-name" id="skin-preview-name">Default</div>
-          <div class="skin-preview-hint">Select a skin below or get more at the skin site ↓</div>
+          <div class="skin-preview-hint">下のグリッドからスキンを選択、または + でPNGをアップロード</div>
         </div>
       </div>
 
-      <!-- 20-slot grid (5 columns × 4 rows) -->
-      <div class="skin-grid-20" id="skin-grid-20"></div>
-
-      <!-- Skin site banner -->
-      <a class="skin-site-banner" id="skin-site-link" href="#" target="_blank">
-        <div class="skin-site-icon">🦇</div>
-        <div class="skin-site-text">
-          <div class="skin-site-title">Bat PVP Skin Site</div>
-          <div class="skin-site-sub">GET OFFICIAL SKINS · batpvp-skins.netlify.app</div>
-        </div>
-        <div class="skin-site-arrow">›</div>
-      </a>
+      <!-- 10-slot grid (5 columns × 2 rows) -->
+      <div class="skin-grid-10" id="skin-grid-10"></div>
 
       <input type="file" id="skin-upload-input" accept="image/png">
 
@@ -281,6 +291,15 @@ input[readonly]{background:#f5f6fa;color:#95a5a6;cursor:default;border-color:#ec
       <label>USER ID</label>
       <div class="uid-box" id="uid-display">--------</div>
       <div class="uid-hint">YOUR UNIQUE PLAYER ID (READ ONLY)</div>
+
+      <!-- DANGER ZONE -->
+      <div class="divider"></div>
+      <div class="danger-zone">
+        <div class="danger-zone-title">⚠ DANGER ZONE</div>
+        <div class="danger-zone-desc">アカウントを削除すると、ランキングのデータとすべてのセーブデータが完全に削除されます。この操作は取り消せません。</div>
+        <button class="btn btn-danger" id="btn-delete-account" style="width:100%">🗑 アカウント削除</button>
+      </div>
+
       <div class="divider"></div>
       <button class="btn btn-primary" id="btn-save" style="width:100%">SAVE</button>
       <button class="btn btn-back nav-to-main" style="width:100%">BACK</button>
@@ -310,13 +329,50 @@ import{initializeApp}from'firebase/app';
 import{getDatabase,ref,set,onValue,update,onDisconnect,get,remove,runTransaction}from'firebase/database';
 
 // =====================
+// LINE IN-APP BROWSER DETECTION
+// =====================
+(function(){
+  const ua=navigator.userAgent||'';
+  // LINE in-app browser always has "Line/" in UA
+  const isLine=/\bLine\//i.test(ua);
+  if(isLine){
+    const block=document.getElementById('line-block');
+    block.classList.add('active');
+    // Set open button to current URL with intent to open externally
+    const url=location.href;
+    const btn=document.getElementById('lb-open-btn');
+    // iOS: use x-safari scheme; Android: use intent
+    if(/iPhone|iPad|iPod/i.test(ua)){
+      // On iOS LINE, we can try to force Safari via a special URL scheme
+      btn.href='googlechrome://'+url.replace(/^https?:\/\//,'');
+      btn.onclick=function(e){
+        e.preventDefault();
+        // Try Chrome first, fallback to Safari
+        const safariUrl='x-web-search://?';
+        window.location.href='googlechrome://'+url.replace(/^https?:\/\//,'');
+        setTimeout(()=>{window.location.href=url;},300);
+      };
+    } else {
+      // Android: use intent URL to force external browser
+      btn.href='intent://'+url.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end';
+      btn.onclick=function(e){
+        e.preventDefault();
+        window.location.href='intent://'+url.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end';
+        setTimeout(()=>{window.location.href=url;},300);
+      };
+    }
+  }
+})();
+
+// =====================
 // CONSTANTS & SECURITY
 // =====================
 const BANNED=[/^admini/i,/管理者/];
-const MAX_SKINS=20;
-const SKIN_STORAGE_KEY='batpvp_skins_v2'; // array of {name,dataURL} or null for slot
-const SKIN_SEL_KEY='batpvp_skin_sel';     // selected slot index
-const RANKING_PATH='rankings_v2';
+const MAX_SKINS=10;
+const SKIN_STORAGE_KEY='batpvp_skins_v3'; // v3 = 10 slots, no validation
+const SKIN_SEL_KEY='batpvp_skin_sel';
+// New ranking path: keyed by UID only (not name+uid), so name changes propagate
+const RANKING_PATH='rankings_v3';
 const BAT_COLOR=0x8d6e63;
 
 function san(s){if(typeof s!=='string')return'';return s.replace(/[<>"'`\\\x00-\x1f\x7f]/g,'').trim().slice(0,30);}
@@ -389,11 +445,9 @@ async function runCountdown(){
 }
 
 // =====================
-// SKIN SYSTEM
+// SKIN SYSTEM (10 slots, no validation, no size limit)
 // =====================
-// skins = array of 20 entries: null = empty, {name,dataURL,img} = filled
 let skins=new Array(MAX_SKINS).fill(null);
-// slot 0 = default (always white, can't delete)
 skins[0]={name:'Default',dataURL:null,img:null};
 let selectedSkinIdx=0;
 
@@ -404,8 +458,7 @@ function saveSkinStorage(){
     return {name:s.name,dataURL:s.dataURL};
   });
   try{localStorage.setItem(SKIN_STORAGE_KEY,JSON.stringify(toSave));}catch(e){
-    // If storage full, trim oldest non-default skins
-    alert('Storage full. Some skins may not be saved.');
+    alert('ストレージが満杯です。古いスキンを削除してください。');
   }
   localStorage.setItem(SKIN_SEL_KEY,String(selectedSkinIdx));
 }
@@ -434,27 +487,21 @@ function loadImg(src){return new Promise(r=>{const img=new Image();img.onload=()
 // =====================
 // SKIN DRAWING
 // =====================
-function drawSkinToCanvas(img,canvas,size){
+function drawSkinToCanvas(img,canvas){
   const ctx=canvas.getContext('2d');
   const w=canvas.width,h=canvas.height;
   ctx.clearRect(0,0,w,h);
   if(!img){
-    // White default MC-style figure
-    const u=w/8; // unit
+    const u=w/8;
     ctx.fillStyle='#e8e8e8';ctx.strokeStyle='#ccc';ctx.lineWidth=0.5;
-    // Head
     ctx.fillRect(2*u,0.2*u,4*u,4*u);ctx.strokeRect(2*u,0.2*u,4*u,4*u);
-    // Body
     ctx.fillRect(2.2*u,4.4*u,3.6*u,3.2*u);ctx.strokeRect(2.2*u,4.4*u,3.6*u,3.2*u);
-    // Arms
     ctx.fillRect(0.6*u,4.4*u,1.4*u,2.8*u);ctx.strokeRect(0.6*u,4.4*u,1.4*u,2.8*u);
     ctx.fillRect(6*u,4.4*u,1.4*u,2.8*u);ctx.strokeRect(6*u,4.4*u,1.4*u,2.8*u);
-    // Legs
     ctx.fillRect(2.2*u,7.7*u,1.6*u,3*u);ctx.strokeRect(2.2*u,7.7*u,1.6*u,3*u);
     ctx.fillRect(4.2*u,7.7*u,1.6*u,3*u);ctx.strokeRect(4.2*u,7.7*u,1.6*u,3*u);
     return;
   }
-  // Render from MC skin sheet
   const sw=img.width,sh=img.height;
   const tmp=document.createElement('canvas');tmp.width=sw;tmp.height=sh;
   const tc=tmp.getContext('2d');tc.drawImage(img,0,0);
@@ -462,12 +509,12 @@ function drawSkinToCanvas(img,canvas,size){
   const s=sw/64;
   const u=w/8;
   function dr(sx,sy,sw2,sh2,dx,dy,dw,dh){ctx.drawImage(tmp,sx*s,sy*s,sw2*s,sh2*s,dx,dy,dw,dh);}
-  dr(8,8,8,8, 2*u,0.2*u, 4*u,4*u);       // head
-  dr(20,20,8,12, 2.2*u,4.4*u, 3.6*u,3.2*u); // body
-  dr(44,20,4,12, 0.6*u,4.4*u, 1.4*u,2.8*u); // right arm
-  try{dr(36,52,4,12, 6*u,4.4*u, 1.4*u,2.8*u);}catch(e){dr(44,20,4,12, 6*u,4.4*u, 1.4*u,2.8*u);} // left arm
-  dr(4,20,4,12, 2.2*u,7.7*u, 1.6*u,3*u);    // right leg
-  try{dr(20,52,4,12, 4.2*u,7.7*u, 1.6*u,3*u);}catch(e){dr(4,20,4,12, 4.2*u,7.7*u, 1.6*u,3*u);} // left leg
+  dr(8,8,8,8, 2*u,0.2*u, 4*u,4*u);
+  dr(20,20,8,12, 2.2*u,4.4*u, 3.6*u,3.2*u);
+  dr(44,20,4,12, 0.6*u,4.4*u, 1.4*u,2.8*u);
+  try{dr(36,52,4,12, 6*u,4.4*u, 1.4*u,2.8*u);}catch(e){dr(44,20,4,12, 6*u,4.4*u, 1.4*u,2.8*u);}
+  dr(4,20,4,12, 2.2*u,7.7*u, 1.6*u,3*u);
+  try{dr(20,52,4,12, 4.2*u,7.7*u, 1.6*u,3*u);}catch(e){dr(4,20,4,12, 4.2*u,7.7*u, 1.6*u,3*u);}
 }
 
 function updateSkinPreview(){
@@ -477,8 +524,8 @@ function updateSkinPreview(){
   document.getElementById('skin-preview-name').textContent=s?.name||'Default';
 }
 
-function renderSkinGrid20(){
-  const grid=document.getElementById('skin-grid-20');if(!grid)return;
+function renderSkinGrid10(){
+  const grid=document.getElementById('skin-grid-10');if(!grid)return;
   grid.innerHTML='';
   const filled=skins.filter(Boolean).length;
   document.getElementById('skin-count-lbl').textContent=`${filled} / ${MAX_SKINS}`;
@@ -488,21 +535,18 @@ function renderSkinGrid20(){
     const slot=document.createElement('div');
 
     if(s){
-      // Filled slot
       slot.className='skin-slot'+(i===selectedSkinIdx?' selected':'')+(i===0?' skin-slot-default':'');
       const cv=document.createElement('canvas');cv.width=40;cv.height=80;
       drawSkinToCanvas(s.img||null,cv);slot.appendChild(cv);
-      slot.onclick=()=>{selectedSkinIdx=i;renderSkinGrid20();updateSkinPreview();};
-      // Delete button (not for slot 0)
+      slot.onclick=()=>{selectedSkinIdx=i;renderSkinGrid10();updateSkinPreview();};
       if(i>0){
         const del=document.createElement('div');del.className='slot-del';del.textContent='×';
         del.onclick=(e)=>{e.stopPropagation();deleteSkin(i);};slot.appendChild(del);
       }
     } else {
-      // Empty slot — show + button
       slot.className='skin-slot skin-slot-add';
       slot.textContent='+';
-      slot.title='Add skin';
+      slot.title='スキンを追加';
       slot.onclick=()=>triggerSkinUpload(i);
     }
     grid.appendChild(slot);
@@ -516,59 +560,26 @@ function triggerSkinUpload(slotIdx){
 }
 document.getElementById('skin-upload-input').onchange=async e=>{
   const file=e.target.files[0];if(!file)return;
-  if(!file.type.includes('png')){alert('PNG only!');e.target.value='';return;}
-  // Size check
-  if(file.size>512*1024){alert('File too large! Max 512KB.');e.target.value='';return;}
+  if(!file.type.includes('png')){alert('PNGファイルのみ対応しています！');e.target.value='';return;}
+  // No size limit — load directly
   const dataURL=await new Promise(r=>{const fr=new FileReader();fr.onload=ev=>r(ev.target.result);fr.readAsDataURL(file);});
   const img=await loadImg(dataURL);
-  if(!img){alert('Failed to load image.');e.target.value='';return;}
-  // Validate: must be exactly 64×64 (strict Bat PVP skin format)
-  if(!validateBatPVPSkin(img)){
-    alert('Invalid skin!\n\nBat PVP skins must be:\n• 64×64 PNG\n• Downloaded from the official Bat PVP Skin Site\n\nGet official skins at batpvp-skins.netlify.app');
-    e.target.value='';return;
-  }
+  if(!img){alert('画像の読み込みに失敗しました。');e.target.value='';return;}
   const name=file.name.replace(/\.png$/i,'').slice(0,16)||'Skin '+(uploadTargetSlot+1);
   skins[uploadTargetSlot]={name,dataURL,img};
   selectedSkinIdx=uploadTargetSlot;
   saveSkinStorage();
-  renderSkinGrid20();updateSkinPreview();
+  renderSkinGrid10();updateSkinPreview();
   e.target.value='';
 };
 
 function deleteSkin(idx){
   if(idx===0)return;
-  if(!confirm('Delete this skin?'))return;
+  if(!confirm('このスキンを削除しますか？'))return;
   skins[idx]=null;
   if(selectedSkinIdx===idx)selectedSkinIdx=0;
   saveSkinStorage();
-  renderSkinGrid20();updateSkinPreview();
-}
-
-// =====================
-// SKIN VALIDATION
-// For official Bat PVP skins: 64×64, specific pixel signature
-// =====================
-function validateBatPVPSkin(img){
-  // Must be exactly 64×64
-  if(img.width!==64||img.height!==64) return false;
-  // Read pixel data for further checks
-  const cv=document.createElement('canvas');cv.width=64;cv.height=64;
-  const ctx=cv.getContext('2d');ctx.drawImage(img,0,0);
-  let d;
-  try{d=ctx.getImageData(0,0,64,64).data;}catch(e){return false;}
-  // Check: top-left corner pixel (0,0) must be fully transparent (standard MC skin layout)
-  if(d[3]!==0) return false;
-  // Check: pixel at (63,63) — official skins embed a signature: R=66(B), G=80(P), B=86(V)  (BPV = Bat PVP Version marker)
-  const ox=(63*64+63)*4;
-  if(d[ox]!==66||d[ox+1]!==80||d[ox+2]!==86) return false;
-  // Check: pixel at (0,32) — second signature: R=118, G=50, B=200 (unique magic color)
-  const ox2=(32*64+0)*4;
-  if(d[ox2]!==118||d[ox2+1]!==50||d[ox2+2]!==200) return false;
-  // Check: at least 20% of face region (8-16, 8-16) is non-transparent
-  let faceOpaque=0;
-  for(let fy=8;fy<16;fy++)for(let fx=8;fx<16;fx++){const i2=(fy*64+fx)*4;if(d[i2+3]>128)faceOpaque++;}
-  if(faceOpaque<12) return false; // at least 12/64 face pixels must be drawn
-  return true;
+  renderSkinGrid10();updateSkinPreview();
 }
 
 // Get 3D body color from selected skin
@@ -666,6 +677,13 @@ const floorM=new THREE.Mesh(new THREE.CylinderGeometry(arenaRadius-0.1,arenaRadi
 floorM.position.y=0.02;scene.add(floorM);
 
 // =====================
+// SMOOTH CAMERA STATE
+// =====================
+const camTarget=new THREE.Vector3(0,8,14);
+const camLook=new THREE.Vector3(0,1,0);
+let camFov=58;
+
+// =====================
 // DEMO SCENE (menu bg)
 // =====================
 const demoScene=new THREE.Scene();
@@ -687,7 +705,6 @@ demoEdge.position.y=0.06;demoScene.add(demoEdge);
 const demoFloor=new THREE.Mesh(new THREE.CylinderGeometry(arenaRadius-0.1,arenaRadius-0.1,0.05,6),new THREE.MeshStandardMaterial({color:STAGE.edge}));
 demoFloor.position.y=0.02;demoScene.add(demoFloor);
 
-// Demo fighters
 function makeDemoFighter(color,x){
   const g=new THREE.Group();
   const head=new THREE.Mesh(new THREE.BoxGeometry(0.85,0.85,0.85),new THREE.MeshStandardMaterial({color}));head.position.y=2.05;g.add(head);
@@ -696,7 +713,6 @@ function makeDemoFighter(color,x){
   const aR=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.85,0.28),new THREE.MeshStandardMaterial({color}));aR.position.set(0.52,1.2,0);g.add(aR);
   const lL=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.85,0.28),new THREE.MeshStandardMaterial({color}));lL.position.set(-0.2,0.42,0);g.add(lL);
   const lR=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.85,0.28),new THREE.MeshStandardMaterial({color}));lR.position.set(0.2,0.42,0);g.add(lR);
-  // Bat
   const batPiv=new THREE.Group();batPiv.position.set(0.6,1.3,0);
   const bat=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.06,1.5,8),new THREE.MeshStandardMaterial({color:BAT_COLOR}));bat.rotation.x=Math.PI/2;bat.position.z=0.45;batPiv.add(bat);g.add(batPiv);
   g.position.set(x,0,0);demoScene.add(g);
@@ -727,7 +743,6 @@ function updateDemoFighter(self,target){
   if(to2.length()>0.05)self.mesh.rotation.y=Math.atan2(to2.x,to2.z);
   const d2=Math.sqrt(self.mesh.position.x**2+self.mesh.position.z**2);
   if(d2>arenaRadius*0.8){const sv=new THREE.Vector3(self.mesh.position.x,0,self.mesh.position.z).normalize();self.vx-=sv.x*0.07;self.vz-=sv.z*0.07;}
-  // Walk anim
   const moving=Math.abs(self.vx)+Math.abs(self.vz)>0.01;
   if(moving){
     self.walkCycle+=0.18;
@@ -799,12 +814,22 @@ function buildMCChar(bodyColorHex,skinTex){
   // Body
   const body=new THREE.Mesh(new THREE.BoxGeometry(0.72,1.02,0.4),mkMat(bodyColorHex));
   body.position.y=1.22;g.add(body);
-  // Right arm pivot (so we can rotate from shoulder)
-  const armRPiv=new THREE.Group();armRPiv.position.set(-0.56,1.65,0);
-  const armR=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.9,0.32),mkMat(bodyColorHex));armR.position.y=-0.45;armRPiv.add(armR);g.add(armRPiv);
-  // Left arm pivot (bat arm)
-  const armLPiv=new THREE.Group();armLPiv.position.set(0.56,1.65,0);
-  const armL=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.9,0.32),mkMat(bodyColorHex));armL.position.y=-0.45;armLPiv.add(armL);g.add(armLPiv);
+
+  // Right arm pivot (non-bat side — left of character when facing forward)
+  const armRPiv=new THREE.Group();
+  armRPiv.position.set(-0.56,1.68,0); // shoulder position
+  const armR=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.9,0.32),mkMat(bodyColorHex));
+  armR.position.y=-0.45; // hang down from pivot
+  armRPiv.add(armR);g.add(armRPiv);
+
+  // Left arm pivot (bat arm — right side of character)
+  // This arm holds the bat — pivot at shoulder
+  const armLPiv=new THREE.Group();
+  armLPiv.position.set(0.56,1.68,0);
+  const armL=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.9,0.32),mkMat(bodyColorHex));
+  armL.position.y=-0.45;
+  armLPiv.add(armL);g.add(armLPiv);
+
   // Legs
   const legRPiv=new THREE.Group();legRPiv.position.set(-0.2,0.82,0);
   const legR=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.85,0.32),mkMat(bodyColorHex));legR.position.y=-0.42;legRPiv.add(legR);g.add(legRPiv);
@@ -815,6 +840,44 @@ function buildMCChar(bodyColorHex,skinTex){
   return g;
 }
 
+// Build bat attached to arm — so it moves with the arm
+function buildBatAttached(armLPiv){
+  // Bat pivot is at the hand (bottom of arm, below shoulder by ~0.9)
+  const batGrip=new THREE.Group();
+  // Position at end of arm (hand position relative to shoulder pivot)
+  batGrip.position.set(0, -0.9, 0);
+
+  // Handle
+  const handle=new THREE.Mesh(
+    new THREE.CylinderGeometry(0.07,0.07,0.55,8),
+    new THREE.MeshStandardMaterial({color:0x5d4037,roughness:0.7})
+  );
+  handle.position.y=0.28;batGrip.add(handle);
+
+  // Barrel
+  const barrel=new THREE.Mesh(
+    new THREE.CylinderGeometry(0.145,0.1,0.88,8),
+    new THREE.MeshStandardMaterial({color:BAT_COLOR,roughness:0.6})
+  );
+  barrel.position.y=0.88;batGrip.add(barrel);
+
+  // Knob at bottom
+  const knob=new THREE.Mesh(
+    new THREE.SphereGeometry(0.1,8,6),
+    new THREE.MeshStandardMaterial({color:0x4e342e})
+  );
+  knob.position.y=0;batGrip.add(knob);
+
+  armLPiv.add(batGrip);
+  return batGrip;
+}
+
+// =====================
+// LERP UTILITY
+// =====================
+function lerp(a,b,t){return a+(b-a)*t;}
+function lerpAngle(a,b,t){let d=b-a;while(d<-Math.PI)d+=Math.PI*2;while(d>Math.PI)d-=Math.PI*2;return a+d*t;}
+
 // =====================
 // FIGHTER CLASS
 // =====================
@@ -824,30 +887,24 @@ class Fighter{
     this.alive=true;this.velocity=new THREE.Vector3();this.onGround=true;
     this.stocks=maxStocks;this.mesh=new THREE.Group();
     this.bodyColor=bodyColorHex;
+
     // Animation state
     this.walkCycle=0;
-    this.animState='idle'; // 'idle','walk','jump','fall','swing'
-    this.swingAnim=0; // 0..1 progress
+    this.animState='idle';
+    this.swingAnim=0;
+    this.swingPhase=0; // 0=windup 1=strike 2=followthrough
 
     // Build MC character
     this.charGroup=buildMCChar(bodyColorHex,skinTex);
     this.mesh.add(this.charGroup);
 
-    // Bat: attached to left arm pivot position, extending forward
-    this.batGroup=new THREE.Group();
-    // Bat handle
-    const handle=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.55,8),new THREE.MeshStandardMaterial({color:0x5d4037,roughness:0.7}));
-    handle.position.y=-0.28;this.batGroup.add(handle);
-    // Bat barrel
-    const barrel=new THREE.Mesh(new THREE.CylinderGeometry(0.145,0.1,0.88,8),new THREE.MeshStandardMaterial({color:BAT_COLOR,roughness:0.6}));
-    barrel.position.y=0.44;this.batGroup.add(barrel);
-    // Bat knob
-    const knob=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,6),new THREE.MeshStandardMaterial({color:0x4e342e}));
-    knob.position.y=-0.56;this.batGroup.add(knob);
-    // Position bat relative to left arm
-    this.batGroup.position.set(0.56,1.65,0);
-    this.batGroup.rotation.z=Math.PI/2; // horizontal hold initially
-    this.mesh.add(this.batGroup);
+    // Attach bat to arm pivot
+    const ud=this.charGroup.userData;
+    this.batGrip=buildBatAttached(ud.armLPiv);
+
+    // Idle bat angle: arm angled forward-down, bat pointing up-forward like a real grip
+    ud.armLPiv.rotation.x=-0.3; // arm slightly forward
+    ud.armLPiv.rotation.z=-0.15; // slight outward tilt
 
     this.label=createNameLabel(name,cc);this.mesh.add(this.label);
     this.mesh.position.copy(startPos);scene.add(this.mesh);
@@ -860,16 +917,18 @@ class Fighter{
     this.cpuJumpCD=0;this.cpuAtkCD=0;this.cpuCircleDir=1;
     this.cpuAggressionTimer=30;
   }
+
   respawn(){
     this.alive=true;this.mesh.visible=true;this.velocity.set(0,0,0);
     const side=this.role==='p1'?-1:1;
     this.mesh.position.set(side*5,5,0);this.targetPos.copy(this.mesh.position);
     this.animState='fall';
   }
+
   swing(){
     if(this.swingCooldown>0)return;
-    this.swingCooldown=25;this.isSwinging=true;this.swingTime=0;
-    this.animState='swing';this.swingAnim=0;
+    this.swingCooldown=28;this.isSwinging=true;this.swingTime=0;
+    this.animState='swing';this.swingAnim=0;this.swingPhase=0;
     playSound('swing');
     if(isOnline&&this.role===myRole&&rateLimit('swing',3))
       update(ref(db,`rooms/${roomId}/${myRole}`),{swinging:Date.now()});
@@ -883,70 +942,101 @@ class Fighter{
     if(!ud) return;
     const {armRPiv,armLPiv,legRPiv,legLPiv,head}=ud;
 
-    // Bat idle position: horizontal, held at side
-    // Bat swing: swings forward and up in an arc
-
     if(this.animState==='swing'){
-      this.swingAnim=Math.min(1,this.swingAnim+0.08);
+      this.swingAnim=Math.min(1,this.swingAnim+0.09);
       const t=this.swingAnim;
-      // Swing arc: arm goes forward and up
-      const swingAngle=Math.sin(t*Math.PI)*(-1.8); // z-rotation of arm
-      const swingZ=Math.sin(t*Math.PI)*(-1.4);
-      armLPiv.rotation.x=swingAngle;
-      armLPiv.rotation.z=0;
-      this.batGroup.rotation.z=Math.PI/2+swingAngle*0.8;
-      this.batGroup.rotation.x=swingZ*0.5;
-      // mirror arm
-      armRPiv.rotation.x=swingAngle*0.3;
-      if(this.swingAnim>=1){this.animState=moving?'walk':'idle';this.swingAnim=0;}
+
+      // 3-phase swing: windup (0~0.25) → strike (0.25~0.65) → followthrough (0.65~1.0)
+      let armX, armZ, batZ;
+      if(t < 0.25){
+        // Windup: arm goes back and up
+        const p=t/0.25;
+        armX = lerp(0, -0.8, p);   // arm back
+        armZ = lerp(-0.15, -0.3, p);
+        batZ = lerp(0, 0.4, p);    // bat tip tilts back
+      } else if(t < 0.65){
+        // Strike: arm whips forward fast
+        const p=(t-0.25)/0.4;
+        armX = lerp(-0.8, 1.8, p); // strong forward swing
+        armZ = lerp(-0.3, 0.1, p);
+        batZ = lerp(0.4, -0.5, p); // bat whips through
+      } else {
+        // Follow through: arm continues and decelerates
+        const p=(t-0.65)/0.35;
+        armX = lerp(1.8, 1.2, p);
+        armZ = lerp(0.1, 0.2, p);
+        batZ = lerp(-0.5, -0.2, p);
+      }
+
+      armLPiv.rotation.x = armX;
+      armLPiv.rotation.z = armZ;
+      // Bat grip rotates for extra arc effect
+      this.batGrip.rotation.z = batZ;
+      // Counter-arm mirrors slightly
+      armRPiv.rotation.x = lerp(armRPiv.rotation.x, -armX*0.25, 0.4);
+
+      if(this.swingAnim>=1){
+        this.animState=moving?'walk':'idle';
+        this.swingAnim=0;
+        this.batGrip.rotation.z=0;
+      }
+
     } else if(this.animState==='jump'){
-      // Arms spread slightly up, legs bent up
-      armLPiv.rotation.x=lerp(armLPiv.rotation.x,-0.5,0.2);
-      armRPiv.rotation.x=lerp(armRPiv.rotation.x,-0.5,0.2);
-      legLPiv.rotation.x=lerp(legLPiv.rotation.x,0.35,0.2);
-      legRPiv.rotation.x=lerp(legRPiv.rotation.x,0.35,0.2);
-      // Bat held forward-up
-      this.batGroup.rotation.z=lerp(this.batGroup.rotation.z,Math.PI/2-0.3,0.15);
-      this.batGroup.rotation.x=lerp(this.batGroup.rotation.x,-0.3,0.15);
+      // Natural jump pose: arms raise up slightly, knees tuck
+      armLPiv.rotation.x=lerp(armLPiv.rotation.x,-0.35,0.18);
+      armLPiv.rotation.z=lerp(armLPiv.rotation.z,-0.2,0.18);
+      armRPiv.rotation.x=lerp(armRPiv.rotation.x,-0.55,0.18);
+      armRPiv.rotation.z=lerp(armRPiv.rotation.z,0.1,0.18);
+      legLPiv.rotation.x=lerp(legLPiv.rotation.x,0.4,0.18);
+      legRPiv.rotation.x=lerp(legRPiv.rotation.x,0.4,0.18);
+      this.batGrip.rotation.z=lerp(this.batGrip.rotation.z,0,0.15);
+
     } else if(this.animState==='fall'){
-      // Arms out, legs extended
-      armLPiv.rotation.x=lerp(armLPiv.rotation.x,0.8,0.15);
-      armRPiv.rotation.x=lerp(armRPiv.rotation.x,0.8,0.15);
-      legLPiv.rotation.x=lerp(legLPiv.rotation.x,-0.4,0.15);
-      legRPiv.rotation.x=lerp(legRPiv.rotation.x,-0.4,0.15);
-      this.batGroup.rotation.z=lerp(this.batGroup.rotation.z,Math.PI/2+0.5,0.12);
+      // Falling: arms slightly out, legs stretched
+      armLPiv.rotation.x=lerp(armLPiv.rotation.x,0.5,0.12);
+      armLPiv.rotation.z=lerp(armLPiv.rotation.z,-0.15,0.12);
+      armRPiv.rotation.x=lerp(armRPiv.rotation.x,0.7,0.12);
+      armRPiv.rotation.z=lerp(armRPiv.rotation.z,0.15,0.12);
+      legLPiv.rotation.x=lerp(legLPiv.rotation.x,-0.3,0.12);
+      legRPiv.rotation.x=lerp(legRPiv.rotation.x,-0.3,0.12);
+      this.batGrip.rotation.z=lerp(this.batGrip.rotation.z,0,0.1);
+
     } else if(this.animState==='walk'&&moving){
       this.walkCycle+=0.19;
       const sw=Math.sin(this.walkCycle)*0.6;
-      armRPiv.rotation.x=lerp(armRPiv.rotation.x,sw,0.4);
-      armLPiv.rotation.x=lerp(armLPiv.rotation.x,-sw*0.4,0.4); // bat arm less swing
-      legRPiv.rotation.x=lerp(legRPiv.rotation.x,-sw,0.4);
-      legLPiv.rotation.x=lerp(legLPiv.rotation.x,sw,0.4);
-      // Bat bobs while walking
-      this.batGroup.rotation.z=lerp(this.batGroup.rotation.z,Math.PI/2,0.15);
-      this.batGroup.rotation.x=lerp(this.batGroup.rotation.x,0,0.15);
-      if(head) head.rotation.y=Math.sin(this.walkCycle*0.5)*0.07;
+      const swS=Math.sin(this.walkCycle+0.3)*0.18; // slight shoulder sway
+
+      // Natural walk: arms swing opposite to legs, bat arm less because it holds bat
+      armRPiv.rotation.x=lerp(armRPiv.rotation.x,sw*0.9,0.35);
+      armRPiv.rotation.z=lerp(armRPiv.rotation.z,swS,0.35);
+      armLPiv.rotation.x=lerp(armLPiv.rotation.x,-0.3+sw*0.25,0.35); // bat arm: slight hold forward, small swing
+      armLPiv.rotation.z=lerp(armLPiv.rotation.z,-0.15,0.2);
+      legRPiv.rotation.x=lerp(legRPiv.rotation.x,-sw,0.35);
+      legLPiv.rotation.x=lerp(legLPiv.rotation.x,sw,0.35);
+      if(head) head.rotation.y=Math.sin(this.walkCycle*0.5)*0.06;
+      this.batGrip.rotation.z=lerp(this.batGrip.rotation.z,0,0.15);
+
     } else {
-      // Idle: relax everything
-      armRPiv.rotation.x=lerp(armRPiv.rotation.x,0.1,0.12);
-      armLPiv.rotation.x=lerp(armLPiv.rotation.x,0,0.12);
-      armRPiv.rotation.z=lerp(armRPiv.rotation.z,0,0.12);
-      armLPiv.rotation.z=lerp(armLPiv.rotation.z,0,0.12);
-      legRPiv.rotation.x=lerp(legRPiv.rotation.x,0,0.12);
-      legLPiv.rotation.x=lerp(legLPiv.rotation.x,0,0.12);
-      // Bat: natural hold at side, angled slightly forward
-      this.batGroup.rotation.z=lerp(this.batGroup.rotation.z,Math.PI/2,0.12);
-      this.batGroup.rotation.x=lerp(this.batGroup.rotation.x,0.3,0.12);
-      if(head) head.rotation.y*=0.88;
+      // Idle: relaxed stance, bat held naturally at side
+      armRPiv.rotation.x=lerp(armRPiv.rotation.x,0.1,0.1);
+      armRPiv.rotation.z=lerp(armRPiv.rotation.z,0.05,0.1);
+      armLPiv.rotation.x=lerp(armLPiv.rotation.x,-0.3,0.1);  // bat arm held slightly forward
+      armLPiv.rotation.z=lerp(armLPiv.rotation.z,-0.15,0.1);
+      legRPiv.rotation.x=lerp(legRPiv.rotation.x,0,0.1);
+      legLPiv.rotation.x=lerp(legLPiv.rotation.x,0,0.1);
+      // Idle bat bob: gentle up-down sway
+      const idleBob=Math.sin(Date.now()*0.002)*0.04;
+      this.batGrip.rotation.z=lerp(this.batGrip.rotation.z,idleBob,0.08);
+      if(head) head.rotation.y*=0.9;
     }
   }
 
   update(keys){
     if(!this.alive) return;
     if(isOnline&&this.role!==myRole){
-      this.mesh.position.lerp(this.targetPos,0.35);
-      let d=this.targetRotY-this.mesh.rotation.y;while(d<-Math.PI)d+=Math.PI*2;while(d>Math.PI)d-=Math.PI*2;
-      this.mesh.rotation.y+=d*0.35;
+      // Smooth interpolation for remote player
+      this.mesh.position.lerp(this.targetPos,0.3);
+      this.mesh.rotation.y=lerpAngle(this.mesh.rotation.y,this.targetRotY,0.3);
       if(this.isSwinging)this.swingLogic();
       this.updateAnim(false);
       return;
@@ -954,7 +1044,6 @@ class Fighter{
     if(this.swingCooldown>0)this.swingCooldown--;
     if(this.cpuAtkCD>0)this.cpuAtkCD--;
 
-    const wasOnGround=this.onGround;
     this.velocity.y-=0.015;
     this.mesh.position.add(this.velocity);
 
@@ -985,9 +1074,13 @@ class Fighter{
 
     this.mesh.position.add(move);
     const moving=move.length()>0.01;
-    if(moving)this.mesh.rotation.y=Math.atan2(move.x,move.z);
+    if(moving){
+      // Smooth rotation using lerpAngle
+      const targetRY=Math.atan2(move.x,move.z);
+      this.mesh.rotation.y=lerpAngle(this.mesh.rotation.y,targetRY,0.22);
+    }
 
-    // Update animation state (not swing — that's set in swing())
+    // Update animation state
     if(this.animState!=='swing'){
       if(!this.onGround&&this.velocity.y>0.05) this.animState='jump';
       else if(!this.onGround&&this.velocity.y<-0.05) this.animState='fall';
@@ -1072,6 +1165,7 @@ class Fighter{
     }
     if(this.swingTime>2){this.isSwinging=false;}
   }
+
   loseStock(){
     if(!this.alive)return;
     this.stocks--;playSound('stock');updateStockHUD(this.role,this.stocks,maxStocks);
@@ -1079,8 +1173,6 @@ class Fighter{
     else{this.alive=false;this.mesh.visible=false;playSound('fall');setTimeout(()=>this.respawn(),1200);}
   }
 }
-
-function lerp(a,b,t){return a+(b-a)*t;}
 
 // =====================
 // WIN / RANKING
@@ -1100,15 +1192,27 @@ function checkWin(loser){
   const tmr=setTimeout(()=>location.reload(),delay);
   es.addEventListener('click',()=>{clearTimeout(tmr);location.reload();},{once:true});
 }
+
+// =====================
+// RANKING v3: keyed by UID only
+// Name updates automatically — no duplicate entries per player
+// =====================
 async function recordResult(won){
   try{
     const sn=san(nickname).slice(0,13);
-    const k=safeKey(sn+'_'+playerUID);
-    const rr=ref(db,`${RANKING_PATH}/${k}`);
+    // Key is just playerUID — one entry per player, name always up-to-date
+    const rr=ref(db,`${RANKING_PATH}/${playerUID}`);
     const snap=await get(rr);const cur=snap.val()||{wins:0,losses:0};
-    await update(rr,{wins:(cur.wins||0)+(won?1:0),losses:(cur.losses||0)+(won?0:1),name:sn,country:san(country).slice(0,5),uid:playerUID});
+    await update(rr,{
+      wins:(cur.wins||0)+(won?1:0),
+      losses:(cur.losses||0)+(won?0:1),
+      name:sn,           // always overwrite with latest name
+      country:san(country).slice(0,5),
+      uid:playerUID
+    });
   }catch(e){}
 }
+
 async function loadRanking(){
   const el=document.getElementById('ranking-content');
   el.innerHTML='<div style="color:#95a5a6;text-align:center;padding:16px;font-weight:700">Loading...</div>';
@@ -1121,6 +1225,26 @@ async function loadRanking(){
     const th=`<thead><tr><th>RANK</th><th>PLAYER</th><th>W</th><th>L</th><th>WIN%</th></tr></thead>`;
     el.innerHTML=`<div class="ranking-scroll"><table class="rank-table">${th}<tbody>${rows}</tbody></table></div>`;
   }catch(e){el.innerHTML='<div style="color:#e74c3c;text-align:center;padding:12px;font-weight:700">Failed to load</div>';}
+}
+
+// =====================
+// ACCOUNT DELETION
+// =====================
+async function deleteAccount(){
+  const confirmed1=confirm('⚠️ アカウントを削除しますか？\n\nランキングデータとセーブデータが完全に削除されます。\nこの操作は取り消せません。');
+  if(!confirmed1)return;
+  const confirmed2=confirm('本当に削除しますか？\n\n「OK」を押すと即座に削除されます。');
+  if(!confirmed2)return;
+
+  try{
+    // Delete ranking entry
+    await remove(ref(db,`${RANKING_PATH}/${playerUID}`));
+  }catch(e){}
+
+  // Clear all local storage
+  localStorage.clear();
+  alert('アカウントを削除しました。');
+  location.reload();
 }
 
 // =====================
@@ -1175,7 +1299,7 @@ const showM=id=>{
     if(s.lang)document.getElementById('lang-select').value=s.lang;
     if(s.country)document.getElementById('country-select').value=s.country;
     document.getElementById('uid-display').textContent=playerUID;
-    renderSkinGrid20();updateSkinPreview();
+    renderSkinGrid10();updateSkinPreview();
   }
 };
 document.getElementById('nav-play').onclick=()=>showM('menu-play');
@@ -1188,9 +1312,7 @@ document.querySelectorAll('.nav-to-main:not(#btn-save)').forEach(b=>b.onclick=()
 document.getElementById('btn-match-back').onclick=()=>showM('menu-play');
 document.getElementById('btn-room-back').onclick=()=>location.reload();
 document.getElementById('btn-cpu').onclick=()=>startCPUGame();
-
-// Skin site link
-document.getElementById('skin-site-link').href='https://batpvp-skins.netlify.app';
+document.getElementById('btn-delete-account').onclick=()=>deleteAccount();
 
 // =====================
 // applyL
@@ -1336,13 +1458,28 @@ function animate(){
   }
   if(gameState==='PLAYING'){p1.update(input);p2.update({});}
   updatePtSys();
-  const mid=new THREE.Vector3().addVectors(p1.mesh.position,p2.mesh.position).multiplyScalar(0.5);
-  const dist=p1.mesh.position.distanceTo(p2.mesh.position);
-  const zoom=Math.max(12,Math.min(24,dist+8));
-  camera.position.lerp(new THREE.Vector3(mid.x,zoom*.78,mid.z+zoom),.1);
-  camera.lookAt(mid);camera.fov=50+dist*.5;camera.updateProjectionMatrix();
+
+  // Smooth camera: interpolate position and look-at
+  if(gameState==='PLAYING'||gameState==='ENDED'){
+    const mid=new THREE.Vector3().addVectors(p1.mesh.position,p2.mesh.position).multiplyScalar(0.5);
+    const dist=p1.mesh.position.distanceTo(p2.mesh.position);
+    const targetZoom=Math.max(12,Math.min(24,dist+8));
+    const targetFov=50+dist*0.5;
+
+    // Smooth camera target
+    camTarget.lerp(new THREE.Vector3(mid.x, targetZoom*0.78, mid.z+targetZoom), 0.07);
+    camLook.lerp(mid, 0.07);
+    camFov=lerp(camFov, targetFov, 0.06);
+
+    camera.position.copy(camTarget);
+    camera.lookAt(camLook);
+    camera.fov=camFov;
+    camera.updateProjectionMatrix();
+  }
+
   renderer.render(scene,camera);
 }
+
 const sleep=m=>new Promise(r=>setTimeout(r,m));
 window.addEventListener('resize',()=>{
   camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);
